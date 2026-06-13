@@ -63,9 +63,9 @@ describe("buildMissionControl + findLastSessionDate (real memory.md)", () => {
 
   it("reads focus + last session from a freshly initialized project", () => {
     runInit(dir, { agents: "claude-code", projectType: "fullstack", projectName: "my-dapp" }, FIXED);
-    const data = buildMissionControl(dir)!;
+    const data = buildMissionControl(dir, FIXED)!;
     expect(data.focus?.project).toBe("my-dapp");
-    expect(data.lastSession).toBe("2026-06-13");
+    expect(data.lastSession).toBe("today (Jun 13)");
     expect(findLastSessionDate(dir)).toBe("2026-06-13");
     expect(data.recent).toBe("cognitiveOS initialized");
   });
