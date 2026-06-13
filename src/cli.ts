@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { Command } from "commander";
 import { initCommand } from "./commands/init.js";
+import { startCommand } from "./commands/start.js";
 
 const program = new Command();
 
@@ -22,7 +23,7 @@ program
   .command("start")
   .description("Mission Control — show where you left off (reads memory.md).")
   .action((): void => {
-    console.log("start — not implemented yet (T-020→T-023)");
+    startCommand();
   });
 
 program
