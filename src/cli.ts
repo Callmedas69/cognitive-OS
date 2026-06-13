@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { Command } from "commander";
+import { initCommand } from "./commands/init.js";
 
 const program = new Command();
 
@@ -13,8 +14,8 @@ program
 program
   .command("init")
   .description("Scaffold the ICM filesystem (3-question wizard). Runs once per project.")
-  .action((): void => {
-    console.log("init — not implemented yet (T-015→T-019)");
+  .action(async (): Promise<void> => {
+    await initCommand();
   });
 
 program
@@ -40,4 +41,4 @@ program
     console.log("check — not implemented yet (T-025→T-026)");
   });
 
-program.parse();
+await program.parseAsync();
