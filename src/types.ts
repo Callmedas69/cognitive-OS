@@ -14,3 +14,13 @@ export interface InitAnswers {
   projectType: ProjectType;
   projectName: string;
 }
+
+// A sub-folder created inside projects/[name]/ with its own CONTEXT.md.
+export interface ZoneFolder {
+  path: string;
+  context: string;
+}
+
+export interface ProjectTemplate {
+  folders: ZoneFolder[];
+}
