@@ -7,6 +7,7 @@ import { generateMemory } from "../generators/memory.js";
 import { generateSkillFiles } from "../generators/skill-files.js";
 import { generateHooks } from "../generators/hooks.js";
 import { generateProjectTemplate } from "../generators/project-template.js";
+import { generateFirstSession } from "../generators/session.js";
 
 // Minimal prompt signature — lets tests inject a fake without a TTY.
 export type PromptFn = (questions: unknown) => Promise<RawAnswers>;
@@ -84,12 +85,17 @@ function wantsClaudeHooks(agents: AgentChoice): boolean {
  * zones → memory → skill files → hooks (Claude/All) → project template.
  * Pure generation — callers wrap this in atomicGenerate for atomicity.
  */
-export function generateAll(stageDir: string, answers: InitAnswers): void {
+export function generateAll(
+  stageDir: string,
+  answers: InitAnswers,
+  now: Date = new Date()
+): void {
   generateZones(stageDir);
   generateMemory(stageDir, answers);
   generateSkillFiles(stageDir, answers);
   if (wantsClaudeHooks(answers.agents)) generateHooks(stageDir);
   generateProjectTemplate(stageDir, answers);
+  generateFirstSession(stageDir, now);
 }
 
 /**
@@ -97,8 +103,20 @@ export function generateAll(stageDir: string, answers: InitAnswers): void {
  * safeWrite (existing user files never overwritten). On any error mid-build the
  * stage is discarded and targetDir is left untouched — no partial files.
  */
-export function runInit(targetDir: string, answers: InitAnswers): GenerateResult {
-  return atomicGenerate(targetDir, (stage) => generateAll(stage, answers));
+export function runInit(
+  targetDir: string,
+  answers: InitAnswers,
+  now: Date = new Date()
+): GenerateResult {
+  return atomicGenerate(targetDir, (stage) => generateAll(stage, answers, now));
+}
+
+/** Success summary printed after init (TDD 4.1 step 5). */
+export function renderSummary(): string {
+  return [
+    "✓ cognitiveOS ready. Next: open your agent and start working.",
+    "  Your agent will read memory.md automatically.",
+  ].join("\n");
 }
 
 /**
@@ -122,5 +140,5 @@ export async function initCommand(
   if (result.conflicts.length > 0) {
     console.log(`Kept ${result.conflicts.length} existing file(s): ${result.conflicts.join(", ")}`);
   }
-  console.log(`✓ cognitiveOS ready (${result.written.length} files written).`);
+  console.log(renderSummary());
 }
