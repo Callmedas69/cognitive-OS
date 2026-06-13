@@ -1,0 +1,38 @@
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { existsSync, mkdtempSync, readdirSync, rmSync } from "node:fs";
+import { join } from "node:path";
+import { tmpdir } from "node:os";
+import { generateProjectTemplate } from "../src/generators/project-template.js";
+import type { InitAnswers } from "../src/types.js";
+
+let dir: string;
+beforeEach(() => {
+  dir = mkdtempSync(join(tmpdir(), "cogproj-"));
+});
+afterEach(() => {
+  rmSync(dir, { recursive: true, force: true });
+});
+
+const base = (over: Partial<InitAnswers> = {}): InitAnswers => ({
+  agents: "claude-code",
+  projectType: "blockchain",
+  projectName: "my-dapp",
+  ...over,
+});
+
+describe("generateProjectTemplate", () => {
+  it("blockchain → 5 stage subfolders, each with CONTEXT.md", () => {
+    generateProjectTemplate(dir, base({ projectType: "blockchain" }));
+    const root = join(dir, "projects", "my-dapp");
+    for (const stage of ["research", "contracts", "frontend", "deploy", "audit"]) {
+      expect(existsSync(join(root, stage, "CONTEXT.md")), stage).toBe(true);
+    }
+  });
+
+  it("minimal type → project root only, no stage folders", () => {
+    generateProjectTemplate(dir, base({ projectType: "fullstack" }));
+    const root = join(dir, "projects", "my-dapp");
+    expect(existsSync(root)).toBe(true);
+    expect(readdirSync(root)).toEqual([]);
+  });
+});
