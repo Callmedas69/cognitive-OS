@@ -44,4 +44,9 @@ program
     checkCommand(process.cwd(), opts.fix ?? false);
   });
 
-await program.parseAsync();
+try {
+  await program.parseAsync();
+} catch (err) {
+  console.error(err instanceof Error ? err.message : String(err));
+  process.exitCode = 1;
+}

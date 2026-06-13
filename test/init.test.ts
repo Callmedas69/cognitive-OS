@@ -44,6 +44,11 @@ describe("runInit — fresh dir produces the complete structure", () => {
     }
   });
 
+  it("minimal project type → projects/<name>/ survives the atomic merge (regression)", () => {
+    runInit(dir, answers({ projectType: "fullstack", projectName: "web-app" }));
+    expect(existsSync(join(dir, "projects", "web-app", "CONTEXT.md"))).toBe(true);
+  });
+
   it("codex selection writes AGENTS.md and no Claude hooks", () => {
     runInit(dir, answers({ agents: "codex" }));
     expect(existsSync(join(dir, "AGENTS.md"))).toBe(true);

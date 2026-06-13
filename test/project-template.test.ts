@@ -21,18 +21,18 @@ const base = (over: Partial<InitAnswers> = {}): InitAnswers => ({
 });
 
 describe("generateProjectTemplate", () => {
-  it("blockchain → 5 stage subfolders, each with CONTEXT.md", () => {
+  it("blockchain → root CONTEXT.md + 5 stage subfolders, each with CONTEXT.md", () => {
     generateProjectTemplate(dir, base({ projectType: "blockchain" }));
     const root = join(dir, "projects", "my-dapp");
+    expect(existsSync(join(root, "CONTEXT.md"))).toBe(true);
     for (const stage of ["research", "contracts", "frontend", "deploy", "audit"]) {
       expect(existsSync(join(root, stage, "CONTEXT.md")), stage).toBe(true);
     }
   });
 
-  it("minimal type → project root only, no stage folders", () => {
+  it("minimal type → project root with a CONTEXT.md (folder survives merge), no stages", () => {
     generateProjectTemplate(dir, base({ projectType: "fullstack" }));
     const root = join(dir, "projects", "my-dapp");
-    expect(existsSync(root)).toBe(true);
-    expect(readdirSync(root)).toEqual([]);
+    expect(readdirSync(root)).toEqual(["CONTEXT.md"]);
   });
 });
