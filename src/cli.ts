@@ -3,6 +3,7 @@ import { Command } from "commander";
 import { initCommand } from "./commands/init.js";
 import { startCommand } from "./commands/start.js";
 import { dumpCommand } from "./commands/dump.js";
+import { checkCommand } from "./commands/check.js";
 
 const program = new Command();
 
@@ -40,7 +41,7 @@ program
   .description("Verify the cognitiveOS install is wired correctly.")
   .option("--fix", "auto-repair detected issues (never touches memory.md/user content)")
   .action((): void => {
-    console.log("check — not implemented yet (T-025→T-026)");
+    checkCommand();
   });
 
 await program.parseAsync();
