@@ -40,8 +40,8 @@ program
   .command("check")
   .description("Verify the cognitiveOS install is wired correctly.")
   .option("--fix", "auto-repair detected issues (never touches memory.md/user content)")
-  .action((): void => {
-    checkCommand();
+  .action((opts: { fix?: boolean }): void => {
+    checkCommand(process.cwd(), opts.fix ?? false);
   });
 
 await program.parseAsync();

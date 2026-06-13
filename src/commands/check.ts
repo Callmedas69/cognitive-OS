@@ -1,6 +1,8 @@
-import { existsSync, readFileSync, readdirSync, writeFileSync, rmSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { parseMemory } from "../lib/parser.js";
+import { safeWrite } from "../lib/fs-utils.js";
+import { ZONE_CONTEXTS } from "../templates/contexts/index.js";
 
 export interface CheckResult {
   label: string;
@@ -131,8 +133,39 @@ export function renderCheckReport(results: CheckResult[]): string {
   return lines.join("\n");
 }
 
-/** `cognitiveos check` — verify the install. Non-zero exit when issues are found. */
-export function checkCommand(targetDir: string = process.cwd()): void {
+/**
+ * Auto-repair safe issues (TDD 4.4 --fix):
+ * - drift → regenerate CLAUDE.md from AGENTS.md (AGENTS.md is source of truth)
+ * - missing zone CONTEXT.md → restore from template
+ * NEVER touches memory.md or any user content.
+ */
+export function runFix(targetDir: string): string[] {
+  const fixed: string[] = [];
+
+  const claudePath = join(targetDir, "CLAUDE.md");
+  const agentsPath = join(targetDir, "AGENTS.md");
+  if (existsSync(claudePath) && existsSync(agentsPath)) {
+    const agents = readFileSync(agentsPath, "utf8");
+    if (readFileSync(claudePath, "utf8") !== agents) {
+      writeFileSync(claudePath, agents, "utf8"); // regenerate generated file (not user content)
+      fixed.push("CLAUDE.md (regenerated from AGENTS.md)");
+    }
+  }
+
+  for (const [zone, context] of Object.entries(ZONE_CONTEXTS)) {
+    const res = safeWrite(join(targetDir, zone, "CONTEXT.md"), context); // safeWrite = only if missing
+    if (res.written) fixed.push(`${zone}/CONTEXT.md (restored)`);
+  }
+
+  return fixed;
+}
+
+/** `cognitiveos check` — verify the install. With fix, auto-repair first. Non-zero exit on remaining issues. */
+export function checkCommand(targetDir: string = process.cwd(), fix = false): void {
+  if (fix) {
+    const fixed = runFix(targetDir);
+    console.log(fixed.length > 0 ? `Fixed:\n${fixed.map((f) => `  • ${f}`).join("\n")}\n` : "Nothing to fix.\n");
+  }
   const results = runChecks(targetDir);
   console.log(renderCheckReport(results));
   if (results.some((r) => !r.ok)) process.exitCode = 1;
