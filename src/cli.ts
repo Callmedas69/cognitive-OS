@@ -2,6 +2,7 @@
 import { Command } from "commander";
 import { initCommand } from "./commands/init.js";
 import { startCommand } from "./commands/start.js";
+import { dumpCommand } from "./commands/dump.js";
 
 const program = new Command();
 
@@ -30,8 +31,8 @@ program
   .command("dump")
   .description("Capture a thought into brain-dump/inbox.md. Zero friction.")
   .argument("[text...]", "the thought to capture")
-  .action((): void => {
-    console.log("dump — not implemented yet (T-024)");
+  .action((text: string[]): void => {
+    dumpCommand(text ?? []);
   });
 
 program
