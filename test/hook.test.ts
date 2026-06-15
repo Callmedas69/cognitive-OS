@@ -45,6 +45,6 @@ describe("runSessionHook", () => {
   it("output contains no ANSI escape codes", () => {
     const out = runSessionHook(JSON.stringify({ invocationNum: 1 }), "antigravity", dir);
     // eslint-disable-next-line no-control-regex
-    expect(/\[/.test(out)).toBe(false);
+    expect(/\x1b\[/.test(out)).toBe(false);
   });
 });
