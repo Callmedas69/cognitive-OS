@@ -3,6 +3,8 @@ import { join } from "node:path";
 import { parseMemory } from "../lib/parser.js";
 import { safeWrite } from "../lib/fs-utils.js";
 import { ZONE_CONTEXTS } from "../templates/contexts/index.js";
+import { wireSessionHooks } from "../generators/session-hook.js";
+import type { AgentChoice } from "../types.js";
 
 export interface CheckResult {
   label: string;
@@ -102,7 +104,33 @@ export function runChecks(targetDir: string): CheckResult[] {
   // 8. sessions/ writable
   results.push({ label: "sessions/", ...sessionsWritable(join(targetDir, "sessions")) });
 
+  // 9. deterministic session hook wired for each installed agent skill
+  const expected = installedHookAgents(targetDir);
+  if (expected.length === 0) {
+    results.push({ label: "session-hook", ok: true, detail: "n/a" });
+  } else {
+    const missing = expected.filter((a) => {
+      const c = readIfExists(join(targetDir, a.cfg));
+      return c === null || !c.includes("cognitiveos start --hook");
+    });
+    results.push({
+      label: "session-hook",
+      ok: missing.length === 0,
+      detail: missing.length === 0 ? "wired" : `not wired: ${missing.map((m) => m.name).join(", ")}`,
+    });
+  }
+
   return results;
+}
+
+/** Agents whose cognitiveOS skill is installed → a session hook is expected. */
+function installedHookAgents(
+  targetDir: string
+): { name: string; skill: string; cfg: string }[] {
+  return [
+    { name: "claude", skill: join(".claude", "skills", "cognitiveos", "SKILL.md"), cfg: join(".claude", "settings.json") },
+    { name: "antigravity", skill: join(".agents", "skills", "cognitiveos", "SKILL.md"), cfg: join(".agents", "hooks.json") },
+  ].filter((a) => existsSync(join(targetDir, a.skill)));
 }
 
 function sessionsWritable(dir: string): { ok: boolean; detail: string } {
@@ -155,6 +183,16 @@ export function runFix(targetDir: string): string[] {
   for (const [zone, context] of Object.entries(ZONE_CONTEXTS)) {
     const res = safeWrite(join(targetDir, zone, "CONTEXT.md"), context); // safeWrite = only if missing
     if (res.written) fixed.push(`${zone}/CONTEXT.md (restored)`);
+  }
+
+  // restore missing session hooks for installed agent skills (idempotent)
+  const claudeSkill = existsSync(join(targetDir, ".claude", "skills", "cognitiveos", "SKILL.md"));
+  const agySkill = existsSync(join(targetDir, ".agents", "skills", "cognitiveos", "SKILL.md"));
+  const choice: AgentChoice | null =
+    claudeSkill && agySkill ? "all" : claudeSkill ? "claude-code" : agySkill ? "antigravity" : null;
+  if (choice) {
+    const res = wireSessionHooks(targetDir, { agents: choice, projectType: "mixed", projectName: "project" });
+    for (const w of res.wired) fixed.push(`${w} (session hook ensured)`);
   }
 
   return fixed;

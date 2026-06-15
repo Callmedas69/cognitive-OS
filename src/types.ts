@@ -7,7 +7,15 @@ export type ProjectType =
   | "content"
   | "mixed";
 
-export type AgentChoice = "claude-code" | "codex" | "antigravity" | "all";
+export type AgentChoice =
+  | "claude-code"
+  | "codex"
+  | "cursor"
+  | "antigravity"
+  | "all";
+
+/** Agents with a confirmed injecting session hook. */
+export type HookAgent = "claude" | "antigravity";
 
 export interface InitAnswers {
   agents: AgentChoice;

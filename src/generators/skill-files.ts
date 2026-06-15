@@ -12,6 +12,7 @@ export function skillFilesFor(agents: AgentChoice): string[] {
     case "claude-code":
       return ["CLAUDE.md"];
     case "codex":
+    case "cursor":
     case "antigravity":
       return ["AGENTS.md"];
     case "all":

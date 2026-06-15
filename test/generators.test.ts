@@ -4,8 +4,14 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { generateMemory } from "../src/generators/memory.js";
 import { generateSkillFiles } from "../src/generators/skill-files.js";
+import { generateAgentSkill } from "../src/generators/agent-skill.js";
 import { generateHooks } from "../src/generators/hooks.js";
 import type { InitAnswers } from "../src/types.js";
+
+const CLAUDE_SKILL = join(".claude", "skills", "cognitiveos", "SKILL.md");
+const CODEX_SKILL = join(".codex", "skills", "cognitiveos", "SKILL.md");
+const ANTIGRAVITY_SKILL = join(".agents", "skills", "cognitiveos", "SKILL.md");
+const CURSOR_RULE = join(".cursor", "rules", "cognitiveos.mdc");
 
 let dir: string;
 beforeEach(() => {
@@ -59,5 +65,55 @@ describe("generateHooks", () => {
     for (const name of ["start-session", "end-session", "dump"]) {
       expect(existsSync(join(dir, ".claude", "commands", `${name}.md`)), name).toBe(true);
     }
+  });
+});
+
+describe("generateAgentSkill", () => {
+  it("claude-code → .claude/skills/cognitiveos/SKILL.md with frontmatter + project", () => {
+    generateAgentSkill(dir, base({ agents: "claude-code" }));
+    const skill = readFileSync(join(dir, CLAUDE_SKILL), "utf8");
+    expect(skill).toMatch(/^---\nname: cognitiveos\ndescription: /);
+    expect(skill).toContain("my-dapp");
+    expect(existsSync(join(dir, CODEX_SKILL))).toBe(false);
+    expect(existsSync(join(dir, ANTIGRAVITY_SKILL))).toBe(false);
+    expect(existsSync(join(dir, CURSOR_RULE))).toBe(false);
+  });
+
+  it("codex → .codex/skills/cognitiveos/SKILL.md only", () => {
+    generateAgentSkill(dir, base({ agents: "codex" }));
+    expect(existsSync(join(dir, CODEX_SKILL))).toBe(true);
+    expect(existsSync(join(dir, CLAUDE_SKILL))).toBe(false);
+  });
+
+  it("antigravity → .agents/skills/cognitiveos/SKILL.md only", () => {
+    generateAgentSkill(dir, base({ agents: "antigravity" }));
+    expect(existsSync(join(dir, ANTIGRAVITY_SKILL))).toBe(true);
+    expect(existsSync(join(dir, CLAUDE_SKILL))).toBe(false);
+    expect(existsSync(join(dir, CURSOR_RULE))).toBe(false);
+  });
+
+  it("cursor → .cursor/rules/cognitiveos.mdc with alwaysApply", () => {
+    generateAgentSkill(dir, base({ agents: "cursor" }));
+    const rule = readFileSync(join(dir, CURSOR_RULE), "utf8");
+    expect(rule).toContain("alwaysApply: true");
+    expect(rule).toContain("my-dapp");
+    expect(existsSync(join(dir, CLAUDE_SKILL))).toBe(false);
+  });
+
+  it("all → SKILL.md for claude+codex+antigravity (identical) + cursor .mdc", () => {
+    generateAgentSkill(dir, base({ agents: "all" }));
+    const claude = readFileSync(join(dir, CLAUDE_SKILL), "utf8");
+    const codex = readFileSync(join(dir, CODEX_SKILL), "utf8");
+    const agy = readFileSync(join(dir, ANTIGRAVITY_SKILL), "utf8");
+    expect(claude).toBe(codex);
+    expect(claude).toBe(agy);
+    expect(existsSync(join(dir, CURSOR_RULE))).toBe(true);
+  });
+
+  it("re-run never overwrites (idempotent)", () => {
+    generateAgentSkill(dir, base({ agents: "claude-code" }));
+    const first = readFileSync(join(dir, CLAUDE_SKILL), "utf8");
+    generateAgentSkill(dir, base({ agents: "claude-code", projectName: "different" }));
+    expect(readFileSync(join(dir, CLAUDE_SKILL), "utf8")).toBe(first);
   });
 });

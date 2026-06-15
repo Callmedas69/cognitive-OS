@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { runChecks, runFix } from "../src/commands/check.js";
 import { runInit } from "../src/commands/init.js";
+import { wireSessionHooks } from "../src/generators/session-hook.js";
 import type { InitAnswers } from "../src/types.js";
 
 let dir: string;
@@ -11,6 +12,7 @@ beforeEach(() => {
   dir = mkdtempSync(join(tmpdir(), "cogfix-"));
   const answers: InitAnswers = { agents: "all", projectType: "blockchain", projectName: "p" };
   runInit(dir, answers, new Date(2026, 5, 13, 9, 0));
+  wireSessionHooks(dir, answers); // mirrors a real `init` (healthy = hook wired)
 });
 afterEach(() => {
   rmSync(dir, { recursive: true, force: true });

@@ -2,16 +2,18 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { mkdtempSync, rmSync, writeFileSync, readFileSync, rmdirSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { runChecks, renderCheckReport } from "../src/commands/check.js";
+import { runChecks, renderCheckReport, runFix } from "../src/commands/check.js";
 import { runInit } from "../src/commands/init.js";
+import { wireSessionHooks } from "../src/generators/session-hook.js";
 import type { InitAnswers } from "../src/types.js";
 
 let dir: string;
 beforeEach(() => {
   dir = mkdtempSync(join(tmpdir(), "cogcheck-"));
-  // full install with both skill files + hooks
+  // full install with both skill files + hooks (mirrors a real `init`)
   const answers: InitAnswers = { agents: "all", projectType: "blockchain", projectName: "p" };
   runInit(dir, answers, new Date(2026, 5, 13, 9, 0));
+  wireSessionHooks(dir, answers);
 });
 afterEach(() => {
   rmSync(dir, { recursive: true, force: true });
@@ -77,5 +79,27 @@ describe("renderCheckReport", () => {
     const report = renderCheckReport(runChecks(dir));
     expect(report).toContain("cognitiveOS health check");
     expect(report).toMatch(/issue.*Fix: cognitiveos check --fix/);
+  });
+});
+
+describe("session-hook check", () => {
+  it("passes when the hook is wired (default fixture)", () => {
+    expect(find("session-hook").ok).toBe(true);
+  });
+
+  it("flags a missing session hook when an agent skill is installed", () => {
+    rmSync(join(dir, ".claude", "settings.json"), { force: true });
+    rmSync(join(dir, ".agents", "hooks.json"), { force: true });
+    const r = find("session-hook");
+    expect(r.ok).toBe(false);
+    expect(r.detail).toContain("not wired");
+  });
+
+  it("--fix restores the missing session hook", () => {
+    rmSync(join(dir, ".claude", "settings.json"), { force: true });
+    runFix(dir);
+    expect(readFileSync(join(dir, ".claude", "settings.json"), "utf8")).toContain(
+      "cognitiveos start --hook",
+    );
   });
 });
