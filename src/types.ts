@@ -7,7 +7,12 @@ export type ProjectType =
   | "content"
   | "mixed";
 
-export type AgentChoice = "claude-code" | "codex" | "antigravity" | "all";
+export type AgentChoice =
+  | "claude-code"
+  | "codex"
+  | "cursor"
+  | "antigravity"
+  | "all";
 
 export interface InitAnswers {
   agents: AgentChoice;

@@ -34,6 +34,8 @@ export function renderSkillFile({ projectName, projectType }: SkillFileVars): st
 Read memory.md before starting ANY task. It contains:
 current focus, energy state, blockers, open loops, active projects.
 
+Full session workflow: the **cognitiveos** skill (auto-loaded by your agent).
+
 ## Zone Map
 Each folder has a CONTEXT.md. Read it before acting in that zone.
 

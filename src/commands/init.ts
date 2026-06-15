@@ -5,6 +5,7 @@ import { detectInstall, decideInitAction } from "../lib/detect.js";
 import { generateZones } from "../generators/zones.js";
 import { generateMemory } from "../generators/memory.js";
 import { generateSkillFiles } from "../generators/skill-files.js";
+import { generateAgentSkill } from "../generators/agent-skill.js";
 import { generateHooks } from "../generators/hooks.js";
 import { generateProjectTemplate } from "../generators/project-template.js";
 import { generateFirstSession } from "../generators/session.js";
@@ -39,6 +40,7 @@ export function buildQuestions() {
       choices: [
         { name: "Claude Code", value: "claude-code" },
         { name: "Codex CLI", value: "codex" },
+        { name: "Cursor", value: "cursor" },
         { name: "Antigravity", value: "antigravity" },
         { name: "All", value: "all" },
       ],
@@ -82,7 +84,7 @@ function wantsClaudeHooks(agents: AgentChoice): boolean {
 
 /**
  * Write the full cognitiveOS structure into a directory, in TDD 4.1 order:
- * zones → memory → skill files → hooks (Claude/All) → project template.
+ * zones → memory → skill files → agent skill → hooks (Claude/All) → project template.
  * Pure generation — callers wrap this in atomicGenerate for atomicity.
  */
 export function generateAll(
@@ -93,6 +95,7 @@ export function generateAll(
   generateZones(stageDir);
   generateMemory(stageDir, answers);
   generateSkillFiles(stageDir, answers);
+  generateAgentSkill(stageDir, answers);
   if (wantsClaudeHooks(answers.agents)) generateHooks(stageDir);
   generateProjectTemplate(stageDir, answers);
   generateFirstSession(stageDir, now);
