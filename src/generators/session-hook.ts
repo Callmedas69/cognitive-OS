@@ -51,7 +51,7 @@ function wireClaude(targetDir: string, res: SessionHookResult): void {
   }
   const data = loaded.data;
   if (alreadyWired(data)) {
-    res.wired.push(rel);
+    // already present — nothing written this run (keeps --fix honest)
     return;
   }
   const hooks = (data.hooks as JsonObject) ?? {};
@@ -83,7 +83,7 @@ function wireAntigravity(targetDir: string, res: SessionHookResult): void {
   }
   const data = loaded.data;
   if (alreadyWired(data)) {
-    res.wired.push(rel);
+    // already present — nothing written this run (keeps --fix honest)
     return;
   }
   data["cognitiveos-session"] = hookObj;
