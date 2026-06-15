@@ -1,8 +1,8 @@
 # cognitiveOS
 
-> Never lose context between sessions.
+> Stop relearning your own project.
 
-An AI-powered filesystem scaffold for developers with ADHD. Your AI agent reads your project state automatically — so you open your laptop and know exactly what to do, instead of spending 30 minutes remembering where you were.
+An AI-powered filesystem scaffold for developers with ADHD. Your AI agent loads your project state automatically — so you open your laptop and know exactly what to do, instead of spending 30 minutes remembering where you were.
 
 **Free. Open source. MIT. No servers, no accounts, no database — just markdown files on your machine.**
 
@@ -37,7 +37,9 @@ your-project/
 └── sessions/               ← auto-logged history
 ```
 
-Your agent reads `memory.md` at session start and updates it at session end — via hooks, automatically. You never run a "save" command.
+`init` also installs a **cognitiveOS agent skill** (`SKILL.md` for Claude Code / Codex / Antigravity, a `.mdc` rule for Cursor) — the operating manual your agent triggers automatically. It carries the zone routing, the one-task + ADHD response rules, and a silent **work loop**: read state → one action → update → re-read.
+
+Your agent reads `memory.md` at session start and updates it at session end — automatically. You never run a "save" command.
 
 **This is not a productivity system. It's a cognitive prosthetic.** A productivity system asks you to maintain it. This maintains itself.
 
@@ -70,16 +72,27 @@ function cd { Set-Location @args; cognitiveos start 2>$null }
 
 ---
 
+## Loads itself at session start
+
+For Claude Code and Antigravity, `init` wires a **deterministic session hook** so your agent loads `memory.md` the moment a session opens — zero typing, can't be skipped. `check` verifies the wiring stays in place; `check --fix` restores it.
+
+- **Claude Code** → `.claude/settings.json` (`SessionStart`)
+- **Antigravity** → `.agents/hooks.json` (`PreInvocation`)
+
+If the hook ever misfires, nothing breaks — the agent skill still tells your agent to read `memory.md` first thing.
+
+---
+
 ## Works with
 
-| Agent | How |
-|-------|-----|
-| Claude Code | reads `CLAUDE.md` + slash-command hooks (`/project:start`, `/project:end`, `/project:dump`) |
-| Codex CLI | reads `AGENTS.md` |
-| Antigravity | reads `AGENTS.md` |
-| Cursor / Windsurf | reads `AGENTS.md` |
+| Agent | Skill / rule it loads | Session-start hook |
+|-------|------------------------|--------------------|
+| Claude Code | `.claude/skills/cognitiveos/SKILL.md` + slash hooks `/start-session` `/end-session` `/dump` | ✅ auto-loads `memory.md` |
+| Codex CLI | `.codex/skills/cognitiveos/SKILL.md` (+ `AGENTS.md`) | — |
+| Antigravity | `.agents/skills/cognitiveos/SKILL.md` (+ `AGENTS.md`) | ✅ auto-loads `memory.md` |
+| Cursor / Windsurf | `.cursor/rules/cognitiveos.mdc` (+ `AGENTS.md`) | — |
 
-> `init` never overwrites or deletes your files — existing `CLAUDE.md` / `AGENTS.md` are kept, not clobbered.
+> `init` never overwrites or deletes your files — existing configs and skill files are kept and merged, not clobbered.
 
 ---
 

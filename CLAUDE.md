@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **cognitiveOS** — an npm CLI that scaffolds an ICM (Interpreted Context Methodology) filesystem for solo developers with ADHD. The CLI generates markdown files + agent config once; after that the AI agent + hooks do all the work. **The CLI is a scaffolding tool, not a runtime.** No servers, no database, no network calls, no telemetry.
 
-> Status: greenfield. The repo is empty — no code committed yet. Build it by following the task sequence. The full spec lives in the vault (see Source-of-truth docs below).
+> Status: **MVP built + published** (`cognitiveos@0.0.1` beta on npm; live on `main`, CI green). All 4 commands work. Three add-ons shipped ahead of the T-034 gate: a **cross-agent agent skill** (`SKILL.md` for Claude/Codex/Antigravity + `.cursor/rules/*.mdc`), a **deterministic session-start hook** (`start --hook`, wired into `.claude/settings.json` + `.agents/hooks.json`), and the **in-session agentic loop** (shared `LOOP_BLOCK` in the skill files). `check` runs 10 checks. Build sequence below is the original TTD; the full spec lives in the vault (see Source-of-truth docs).
 
 ## Source-of-truth docs (read before building)
 
@@ -95,7 +95,9 @@ CLI generates files once, then gets out of the way. Layering:
 - `src/templates/` — all markdown as typed JS string functions (`contexts/`, `hooks/`, `project-types/`). No file fixtures — templates are code.
 - `src/lib/` — `fs-utils.ts` (safe/atomic writes), `parser.ts` (memory.md section parser), `output.ts` (chalk formatting).
 
-**What `init` generates** in a user's project: `CLAUDE.md` + `AGENTS.md` (identical routing tables), `memory.md`, 6 zone folders each with `CONTEXT.md` (brain-dump, queue, focus, projects, ideas, someday), `.claude/commands/` hooks, `sessions/`, and `projects/[name]/` from a project-type template.
+**What `init` generates** in a user's project: `CLAUDE.md` + `AGENTS.md` (identical routing tables, including the shared `LOOP_BLOCK`), `memory.md`, 6 zone folders each with `CONTEXT.md` (brain-dump, queue, focus, projects, ideas, someday), `.claude/commands/` slash hooks, the **agent skill** per selected agent (`.claude`/`.codex`/`.agents/skills/cognitiveos/SKILL.md` + `.cursor/rules/cognitiveos.mdc`), the **session-start hook** wiring (`.claude/settings.json` + `.agents/hooks.json`), `sessions/`, and `projects/[name]/` from a project-type template.
+
+Beyond the 4 user commands, `start` has a machine-only `--hook --agent=<claude|antigravity>` mode (reads hook stdin, emits the agent's session-start envelope; never throws). Generators: `src/generators/agent-skill.ts` (skill files), `src/generators/session-hook.ts` (backup-safe config merge). Templates: `src/templates/cognitiveos-skill.md.ts`, `src/templates/loop-block.ts`.
 
 ## Non-negotiable invariants
 
