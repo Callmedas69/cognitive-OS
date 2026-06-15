@@ -73,6 +73,21 @@ describe("runChecks — each failure mode detected individually", () => {
   });
 });
 
+describe("loop-block check", () => {
+  it("passes when the loop block is present (default fixture)", () => {
+    expect(find("loop-block").ok).toBe(true);
+  });
+
+  it("flags a skill file missing the loop block", () => {
+    const claudePath = join(dir, "CLAUDE.md");
+    const stripped = readFileSync(claudePath, "utf8").replace("## How To Work Here", "## Gone");
+    writeFileSync(claudePath, stripped);
+    const r = find("loop-block");
+    expect(r.ok).toBe(false);
+    expect(r.detail).toContain("CLAUDE.md");
+  });
+});
+
 describe("renderCheckReport", () => {
   it("shows the fix hint when issues exist", () => {
     rmSync(join(dir, "memory.md"));

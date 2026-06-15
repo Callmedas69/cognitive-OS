@@ -10,6 +10,7 @@ The user's raw thought. Nothing else to read first.
 - No filter, no judgment, no "that's not relevant".
 - Never ask for more context.
 - One line per capture, timestamped.
+- One action at a time — re-read state before the next.
 
 ## Output
 Append the thought to inbox.md as \`- [YYYY-MM-DD HH:MM] text\`.
