@@ -6,6 +6,7 @@ import { generateZones } from "../generators/zones.js";
 import { generateMemory } from "../generators/memory.js";
 import { generateSkillFiles } from "../generators/skill-files.js";
 import { generateAgentSkill } from "../generators/agent-skill.js";
+import { wireSessionHooks } from "../generators/session-hook.js";
 import { generateHooks } from "../generators/hooks.js";
 import { generateProjectTemplate } from "../generators/project-template.js";
 import { generateFirstSession } from "../generators/session.js";
@@ -143,5 +144,19 @@ export async function initCommand(
   if (result.conflicts.length > 0) {
     console.log(`Kept ${result.conflicts.length} existing file(s): ${result.conflicts.join(", ")}`);
   }
+
+  // Post-generation: merge the deterministic session-start hook into each
+  // agent's native config (read-modify-write on the real target, with backup +
+  // idempotency — deliberately outside runInit's atomic never-overwrite stage).
+  const hooks = wireSessionHooks(cwd, answers);
+  if (hooks.wired.length > 0) {
+    console.log(`Session hook wired: ${hooks.wired.join(", ")}`);
+  }
+  for (const m of hooks.manual) {
+    console.log(
+      `\n⚠ Could not edit ${m.file} (unreadable JSON). Add this hook manually:\n${m.snippet}\n`
+    );
+  }
+
   console.log(renderSummary());
 }

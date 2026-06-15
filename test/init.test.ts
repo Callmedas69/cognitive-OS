@@ -3,7 +3,7 @@ import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSy
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { atomicGenerate } from "../src/lib/fs-utils.js";
-import { generateAll, runInit } from "../src/commands/init.js";
+import { generateAll, runInit, initCommand } from "../src/commands/init.js";
 import type { InitAnswers } from "../src/types.js";
 
 let dir: string;
@@ -77,5 +77,19 @@ describe("runInit — worktree (never overwrite)", () => {
     expect(result.conflicts).toContain("CLAUDE.md");
     // other files still generated
     expect(existsSync(join(dir, "memory.md"))).toBe(true);
+  });
+});
+
+describe("initCommand — wires the session hook", () => {
+  it("creates .claude/settings.json with the SessionStart hook for agents=all", async () => {
+    const fakePrompt = async () => ({
+      agents: "all",
+      projectType: "fullstack",
+      projectName: "demo",
+    });
+    await initCommand(dir, fakePrompt as never);
+    const cfg = join(dir, ".claude", "settings.json");
+    expect(existsSync(cfg)).toBe(true);
+    expect(readFileSync(cfg, "utf8")).toContain("cognitiveos start --hook");
   });
 });
