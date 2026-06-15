@@ -95,9 +95,14 @@ export function parseMemoryContent(content: string): ParseResult {
   for (const [header, lines] of sections) {
     const key = header.toLowerCase();
     if (key === "current focus") {
+      const structuredTask = field(lines, "Task");
+      // Fallback: first non-empty, non-key-value line as free-form task text.
+      const freeFormTask = structuredTask
+        ? undefined
+        : lines.find((l) => l.trim().length > 0 && !l.trim().startsWith("-"))?.trim();
       memory.currentFocus = {
         project: field(lines, "Project"),
-        task: field(lines, "Task"),
+        task: structuredTask ?? freeFormTask,
         status: field(lines, "Status"),
       };
     } else if (key === "energy & state") {

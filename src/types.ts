@@ -14,6 +14,9 @@ export type AgentChoice =
   | "antigravity"
   | "all";
 
+/** Agents with a confirmed injecting session hook. */
+export type HookAgent = "claude" | "antigravity";
+
 export interface InitAnswers {
   agents: AgentChoice;
   projectType: ProjectType;
