@@ -10,6 +10,7 @@ someday/someday.md.
 - Nothing here is urgent. Zero guilt about inaction.
 - Review monthly, not daily.
 - Keep entries short — a pointer, not a plan.
+- One action at a time — re-read state before the next.
 
 ## Output
 Append to someday.md.

@@ -1,4 +1,5 @@
 import type { ProjectType } from "../types.js";
+import { LOOP_BLOCK } from "./loop-block.js";
 
 export interface SkillFileVars {
   projectName: string;
@@ -58,5 +59,7 @@ ${blockchainBlock}
 - current-task.md holds ONE task only — enforce this, always
 - Session start: read memory.md, show current focus + open loops
 - Session end: update memory.md + append to sessions/YYYY-MM-DD.md
+
+${LOOP_BLOCK}
 `;
 }

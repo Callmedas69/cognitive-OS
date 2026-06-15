@@ -1,3 +1,5 @@
+import { LOOP_BLOCK } from "./loop-block.js";
+
 export interface SkillVars {
   projectName: string;
 }
@@ -52,6 +54,8 @@ Claude Code also exposes slash hooks: \`/start-session\`, \`/end-session\`, \`/d
 - Max 3 action items per response.
 - Max 1 question per response.
 - \`focus/current-task.md\` holds ONE task only — enforce this, always.
+
+${LOOP_BLOCK}
 
 ## At session end — ALWAYS
 

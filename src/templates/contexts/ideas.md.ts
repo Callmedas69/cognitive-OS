@@ -10,6 +10,7 @@ ideas/ideas.md.
 - Captured, not committed. No task pressure here.
 - Never auto-promote — the user decides what graduates.
 - One line per idea, optional one-line why.
+- One action at a time — re-read state before the next.
 
 ## Output
 Append to ideas.md.

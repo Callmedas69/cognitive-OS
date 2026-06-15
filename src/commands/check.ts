@@ -4,6 +4,7 @@ import { parseMemory } from "../lib/parser.js";
 import { safeWrite } from "../lib/fs-utils.js";
 import { ZONE_CONTEXTS } from "../templates/contexts/index.js";
 import { wireSessionHooks } from "../generators/session-hook.js";
+import { LOOP_MARKER } from "../templates/loop-block.js";
 import type { AgentChoice } from "../types.js";
 
 export interface CheckResult {
@@ -103,6 +104,22 @@ export function runChecks(targetDir: string): CheckResult[] {
 
   // 8. sessions/ writable
   results.push({ label: "sessions/", ...sessionsWritable(join(targetDir, "sessions")) });
+
+  // 10. agentic loop block present in each generated skill file
+  const loopFiles = ([
+    ["CLAUDE.md", claude],
+    ["AGENTS.md", agents],
+  ] as const).filter(([, c]) => c !== null);
+  if (loopFiles.length === 0) {
+    results.push({ label: "loop-block", ok: true, detail: "n/a" });
+  } else {
+    const missing = loopFiles.filter(([, c]) => !c!.includes(LOOP_MARKER)).map(([l]) => l);
+    results.push({
+      label: "loop-block",
+      ok: missing.length === 0,
+      detail: missing.length === 0 ? "ok" : `missing in ${missing.join(", ")}`,
+    });
+  }
 
   // 9. deterministic session hook wired for each installed agent skill
   const expected = installedHookAgents(targetDir);

@@ -57,6 +57,13 @@ describe("generateSkillFiles", () => {
     expect(claude).toBe(agents);
     expect(claude).toContain("my-dapp");
   });
+
+  it("embeds the agentic loop block in both skill files", () => {
+    generateSkillFiles(dir, base({ agents: "all" }));
+    for (const f of ["CLAUDE.md", "AGENTS.md"]) {
+      expect(readFileSync(join(dir, f), "utf8")).toContain("## How To Work Here");
+    }
+  });
 });
 
 describe("generateHooks", () => {
@@ -115,5 +122,10 @@ describe("generateAgentSkill", () => {
     const first = readFileSync(join(dir, CLAUDE_SKILL), "utf8");
     generateAgentSkill(dir, base({ agents: "claude-code", projectName: "different" }));
     expect(readFileSync(join(dir, CLAUDE_SKILL), "utf8")).toBe(first);
+  });
+
+  it("embeds the agentic loop block in the SKILL.md operating manual", () => {
+    generateAgentSkill(dir, base({ agents: "claude-code" }));
+    expect(readFileSync(join(dir, CLAUDE_SKILL), "utf8")).toContain("## How To Work Here");
   });
 });

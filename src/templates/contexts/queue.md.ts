@@ -10,6 +10,7 @@ brain-dump/inbox.md and memory.md (energy + current focus).
 - Sort by urgency × energy × dopamine.
 - Surface the smallest next action first.
 - Max 3 items shown at once.
+- One action at a time — re-read state before the next.
 
 ## Output
 Update sorted.md with the prioritized list.
