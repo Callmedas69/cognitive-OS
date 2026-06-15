@@ -1,6 +1,7 @@
 import { buildMissionControl } from "./start.js";
 import type { HookAgent } from "../types.js";
 import type { MissionControlData } from "../lib/output.js";
+import type { Readable } from "node:stream";
 
 /** Plain-text Mission Control for injection (no ANSI — agents ingest raw text). */
 function renderPlain(d: MissionControlData): string {
@@ -51,4 +52,16 @@ export function runSessionHook(
   } catch {
     return "{}";
   }
+}
+
+/** Read an entire stream to a string, then run the hook. Defaults to process.stdin. */
+export async function readStdinThenHook(
+  stream: Readable = process.stdin,
+  agent: HookAgent = "claude",
+  targetDir: string = process.cwd(),
+): Promise<string> {
+  let raw = "";
+  stream.setEncoding?.("utf8");
+  for await (const chunk of stream) raw += chunk;
+  return runSessionHook(raw, agent, targetDir);
 }

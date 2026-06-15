@@ -2,8 +2,10 @@
 import { Command } from "commander";
 import { initCommand } from "./commands/init.js";
 import { startCommand } from "./commands/start.js";
+import { readStdinThenHook } from "./commands/hook.js";
 import { dumpCommand } from "./commands/dump.js";
 import { checkCommand } from "./commands/check.js";
+import type { HookAgent } from "./types.js";
 
 const program = new Command();
 
@@ -24,7 +26,14 @@ program
 program
   .command("start")
   .description("Mission Control — show where you left off (reads memory.md).")
-  .action((): void => {
+  .option("--hook", "machine mode: read hook JSON on stdin, emit the agent injection envelope")
+  .option("--agent <name>", "hook target agent: claude | antigravity")
+  .action(async (opts: { hook?: boolean; agent?: string }): Promise<void> => {
+    if (opts.hook) {
+      const agent: HookAgent = opts.agent === "antigravity" ? "antigravity" : "claude";
+      process.stdout.write(await readStdinThenHook(process.stdin, agent));
+      return;
+    }
     startCommand();
   });
 

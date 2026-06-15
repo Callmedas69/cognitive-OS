@@ -3,6 +3,7 @@ import { mkdtempSync, rmSync, writeFileSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { runSessionHook } from "../src/commands/hook.js";
+import { readStdinThenHook } from "../src/commands/hook.js";
 
 let dir: string;
 beforeEach(() => {
@@ -46,5 +47,14 @@ describe("runSessionHook", () => {
     const out = runSessionHook(JSON.stringify({ invocationNum: 1 }), "antigravity", dir);
     // eslint-disable-next-line no-control-regex
     expect(/\x1b\[/.test(out)).toBe(false);
+  });
+});
+
+describe("readStdinThenHook", () => {
+  it("reads a provided stream and returns the envelope string", async () => {
+    const { Readable } = await import("node:stream");
+    const stream = Readable.from([JSON.stringify({ invocationNum: 1 })]);
+    const out = await readStdinThenHook(stream, "antigravity", dir);
+    expect(JSON.parse(out).injectSteps).toBeTruthy();
   });
 });
