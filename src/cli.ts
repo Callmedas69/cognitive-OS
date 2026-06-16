@@ -6,6 +6,7 @@ import { readStdinThenHook } from "./commands/hook.js";
 import { dumpCommand } from "./commands/dump.js";
 import { checkCommand } from "./commands/check.js";
 import type { HookAgent } from "./types.js";
+import pkg from "../package.json" with { type: "json" };
 
 const program = new Command();
 
@@ -14,7 +15,7 @@ program
   .description(
     "An AI-powered ICM filesystem scaffold for developers with ADHD. Never lose context between sessions."
   )
-  .version("0.0.1");
+  .version(pkg.version);
 
 program
   .command("init")
