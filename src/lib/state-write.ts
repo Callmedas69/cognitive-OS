@@ -1,4 +1,4 @@
-import type { CurrentFocus, EnergyState, State } from "./parser.js";
+import type { CurrentFocus, SessionHandoff, State } from "./parser.js";
 
 /** A line is a `## ` header (ignoring a trailing \r and surrounding space). */
 function headerName(line: string): string | null {
@@ -54,11 +54,12 @@ function serializeFocus(f: CurrentFocus): string[] {
   ];
 }
 
-function serializeEnergy(e: EnergyState): string[] {
+function serializeHandoff(h: SessionHandoff): string[] {
   return [
-    `- **Level:** ${e.level ?? ""}`.trimEnd(),
-    `- **Mode:** ${e.mode ?? ""}`.trimEnd(),
-    `- **Last active:** ${e.lastActive ?? ""}`.trimEnd(),
+    `- **Last worked on:** ${h.lastWorkedOn ?? ""}`.trimEnd(),
+    `- **Stopped because:** ${h.stoppedBecause ?? ""}`.trimEnd(),
+    `- **Pick up by:** ${h.pickUpBy ?? ""}`.trimEnd(),
+    `- **Watch out for:** ${h.watchOutFor ?? ""}`.trimEnd(),
   ];
 }
 
@@ -66,8 +67,6 @@ const LIST_HEADERS: Partial<Record<keyof State, string>> = {
   blockers: "Blockers",
   openLoops: "Open Loops",
   activeProjects: "Active Projects",
-  parkedIdeas: "Parked Ideas",
-  someday: "Someday/Maybe",
   recentlyCompleted: "Recently Completed",
   agentNotes: "Agent Notes",
 };
@@ -80,7 +79,7 @@ const LIST_HEADERS: Partial<Record<keyof State, string>> = {
 export function writeBackState(content: string, updates: Partial<State>): string {
   let out = content;
   if (updates.currentFocus) out = updateSection(out, "Current Focus", serializeFocus(updates.currentFocus));
-  if (updates.energyState) out = updateSection(out, "Energy & State", serializeEnergy(updates.energyState));
+  if (updates.sessionHandoff) out = updateSection(out, "Session Handoff", serializeHandoff(updates.sessionHandoff));
   for (const [key, header] of Object.entries(LIST_HEADERS) as [keyof State, string][]) {
     const val = updates[key] as string[] | undefined;
     if (val !== undefined) out = updateSection(out, header, serializeList(val));

@@ -6,20 +6,19 @@ export interface CurrentFocus {
   status?: string;
 }
 
-export interface EnergyState {
-  level?: string;
-  mode?: string;
-  lastActive?: string;
+export interface SessionHandoff {
+  lastWorkedOn?: string;
+  stoppedBecause?: string;
+  pickUpBy?: string;
+  watchOutFor?: string;
 }
 
 export interface State {
   currentFocus: CurrentFocus;
-  energyState: EnergyState;
   blockers: string[];
   openLoops: string[];
   activeProjects: string[];
-  parkedIdeas: string[];
-  someday: string[];
+  sessionHandoff: SessionHandoff;
   recentlyCompleted: string[];
   agentNotes: string[];
 }
@@ -35,8 +34,6 @@ const LIST_SECTIONS: Record<string, keyof State> = {
   blockers: "blockers",
   "open loops": "openLoops",
   "active projects": "activeProjects",
-  "parked ideas": "parkedIdeas",
-  "someday/maybe": "someday",
   "recently completed": "recentlyCompleted",
   "agent notes": "agentNotes",
 };
@@ -105,11 +102,12 @@ export function parseStateContent(content: string): ParseResult {
         task: structuredTask ?? freeFormTask,
         status: field(lines, "Status"),
       };
-    } else if (key === "energy & state") {
-      memory.energyState = {
-        level: field(lines, "Level"),
-        mode: field(lines, "Mode"),
-        lastActive: field(lines, "Last active"),
+    } else if (key === "session handoff") {
+      memory.sessionHandoff = {
+        lastWorkedOn: field(lines, "Last worked on"),
+        stoppedBecause: field(lines, "Stopped because"),
+        pickUpBy: field(lines, "Pick up by"),
+        watchOutFor: field(lines, "Watch out for"),
       };
     } else if (key in LIST_SECTIONS) {
       (memory[LIST_SECTIONS[key]] as string[]) = listItems(lines);
