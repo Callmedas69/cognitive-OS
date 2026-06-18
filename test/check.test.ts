@@ -30,9 +30,9 @@ describe("runChecks — healthy install", () => {
 });
 
 describe("runChecks — each failure mode detected individually", () => {
-  it("missing memory.md", () => {
-    rmSync(join(dir, "memory.md"));
-    expect(find("memory.md").ok).toBe(false);
+  it("missing STATE.md", () => {
+    rmSync(join(dir, "STATE.md"));
+    expect(find("STATE.md").ok).toBe(false);
   });
 
   it("CLAUDE.md without routing table", () => {
@@ -90,7 +90,7 @@ describe("loop-block check", () => {
 
 describe("renderCheckReport", () => {
   it("shows the fix hint when issues exist", () => {
-    rmSync(join(dir, "memory.md"));
+    rmSync(join(dir, "STATE.md"));
     const report = renderCheckReport(runChecks(dir));
     expect(report).toContain("cognitiveOS health check");
     expect(report).toMatch(/issue.*Fix: cognitiveos check --fix/);

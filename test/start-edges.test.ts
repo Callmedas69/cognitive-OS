@@ -13,7 +13,7 @@ afterEach(() => {
   rmSync(dir, { recursive: true, force: true });
 });
 
-describe("edge: missing memory.md", () => {
+describe("edge: missing STATE.md", () => {
   it("buildMissionControl → null; startCommand prints the init hint, no throw", () => {
     expect(buildMissionControl(dir)).toBeNull();
     const log = vi.spyOn(console, "log").mockImplementation(() => {});
@@ -25,7 +25,7 @@ describe("edge: missing memory.md", () => {
 
 describe("edge: 7+ day gap (show only, no prompt)", () => {
   it("renders 'N days ago' for an old session and never prompts", () => {
-    writeFileSync(join(dir, "memory.md"), "## Current Focus\n- **Project:** p\n- **Task:** t\n");
+    writeFileSync(join(dir, "STATE.md"), "## Current Focus\n- **Project:** p\n- **Task:** t\n");
     mkdirSync(join(dir, "sessions"));
     writeFileSync(join(dir, "sessions", "2026-06-03.md"), "## [09:00] Session\n");
 
@@ -49,7 +49,7 @@ describe("edge: 7+ day gap (show only, no prompt)", () => {
 describe("edge: empty sections", () => {
   it("renders gracefully with no loops, no blocker, no recent, no task", () => {
     writeFileSync(
-      join(dir, "memory.md"),
+      join(dir, "STATE.md"),
       [
         "## Current Focus",
         "- **Project:** p",

@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { generateMemory } from "../src/generators/memory.js";
+import { generateState } from "../src/generators/state.js";
 import { generateSkillFiles } from "../src/generators/skill-files.js";
 import { generateAgentSkill } from "../src/generators/agent-skill.js";
 import { generateHooks } from "../src/generators/hooks.js";
@@ -28,12 +28,12 @@ const base = (over: Partial<InitAnswers> = {}): InitAnswers => ({
   ...over,
 });
 
-describe("generateMemory", () => {
-  it("writes memory.md with the project name and 9 sections", () => {
-    generateMemory(dir, base());
-    const md = readFileSync(join(dir, "memory.md"), "utf8");
+describe("generateState", () => {
+  it("writes STATE.md with the project name and 7 sections", () => {
+    generateState(dir, base());
+    const md = readFileSync(join(dir, "STATE.md"), "utf8");
     expect(md).toContain("my-dapp");
-    expect((md.match(/^## /gm) ?? []).length).toBe(9);
+    expect((md.match(/^## /gm) ?? []).length).toBe(7);
   });
 });
 

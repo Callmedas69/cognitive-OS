@@ -9,7 +9,7 @@ let dir: string;
 beforeEach(() => {
   dir = mkdtempSync(join(tmpdir(), "coghook-"));
   writeFileSync(
-    join(dir, "memory.md"),
+    join(dir, "STATE.md"),
     "## Current Focus\nShip the session hook\n\n## Open Loops\n- wire claude\n",
   );
   mkdirSync(join(dir, "sessions"), { recursive: true });
@@ -38,8 +38,8 @@ describe("runSessionHook", () => {
     expect(runSessionHook("not json", "claude", dir)).toBe("{}");
   });
 
-  it("no memory.md → empty {} (never throws)", () => {
-    rmSync(join(dir, "memory.md"), { force: true });
+  it("no STATE.md → empty {} (never throws)", () => {
+    rmSync(join(dir, "STATE.md"), { force: true });
     expect(runSessionHook(JSON.stringify({ invocationNum: 1 }), "antigravity", dir)).toBe("{}");
   });
 

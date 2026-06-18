@@ -6,8 +6,8 @@ describe("hook templates (TDD 4.6)", () => {
     expect(Object.keys(HOOKS).sort()).toEqual(["dump", "end-session", "start-session"]);
   });
 
-  it("start-session reads memory.md and shows state without asking", () => {
-    expect(HOOKS["start-session"]).toContain("Read memory.md");
+  it("start-session reads STATE.md and shows state without asking", () => {
+    expect(HOOKS["start-session"]).toContain("Read STATE.md");
     expect(HOOKS["start-session"]).toContain("Do not ask questions");
   });
 

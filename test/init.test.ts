@@ -22,10 +22,10 @@ const answers = (over: Partial<InitAnswers> = {}): InitAnswers => ({
 });
 
 describe("runInit — fresh dir produces the complete structure", () => {
-  it("writes memory, skill file, zones, hooks, and the project template", () => {
+  it("writes STATE.md, skill file, zones, hooks, and the project template", () => {
     runInit(dir, answers());
 
-    expect(existsSync(join(dir, "memory.md"))).toBe(true);
+    expect(existsSync(join(dir, "STATE.md"))).toBe(true);
     expect(existsSync(join(dir, "CLAUDE.md"))).toBe(true);
 
     for (const zone of ["brain-dump", "queue", "focus", "projects", "ideas", "someday"]) {
@@ -76,7 +76,7 @@ describe("runInit — worktree (never overwrite)", () => {
     expect(readFileSync(join(dir, "CLAUDE.md"), "utf8")).toBe("USER CONTENT");
     expect(result.conflicts).toContain("CLAUDE.md");
     // other files still generated
-    expect(existsSync(join(dir, "memory.md"))).toBe(true);
+    expect(existsSync(join(dir, "STATE.md"))).toBe(true);
   });
 });
 

@@ -42,8 +42,8 @@ describe("runFix", () => {
     expect(find("zones").ok).toBe(true);
   });
 
-  it("NEVER touches memory.md — byte-identical after fix", () => {
-    const memPath = join(dir, "memory.md");
+  it("NEVER touches STATE.md — byte-identical after fix", () => {
+    const memPath = join(dir, "STATE.md");
     const before = readFileSync(memPath, "utf8");
     // create work for fix to do
     writeFileSync(join(dir, "CLAUDE.md"), readFileSync(join(dir, "CLAUDE.md"), "utf8") + "\nx\n");

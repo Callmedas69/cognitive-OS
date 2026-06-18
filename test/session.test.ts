@@ -55,9 +55,9 @@ describe("generateFirstSession", () => {
 });
 
 describe("renderSummary (TDD 4.1)", () => {
-  it("tells the user it's ready and that the agent reads memory.md", () => {
+  it("tells the user it's ready and that the agent reads STATE.md", () => {
     const out = renderSummary();
     expect(out).toContain("cognitiveOS ready");
-    expect(out).toContain("memory.md");
+    expect(out).toContain("STATE.md");
   });
 });
