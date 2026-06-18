@@ -1,4 +1,4 @@
-import { existsSync, readFileSync, writeFileSync, rmSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync, rmSync, renameSync } from "node:fs";
 import { join } from "node:path";
 import { parseState } from "../lib/parser.js";
 import { safeWrite } from "../lib/fs-utils.js";
@@ -31,7 +31,10 @@ export function runChecks(targetDir: string): CheckResult[] {
   // 1. STATE.md exists and parses with all sections
   const memPath = join(targetDir, "STATE.md");
   if (!existsSync(memPath)) {
-    results.push({ label: "STATE.md", ok: false, detail: "missing" });
+    const detail = existsSync(join(targetDir, "memory.md"))
+      ? "legacy memory.md found — run `cognitiveos check --fix` to rename"
+      : "missing";
+    results.push({ label: "STATE.md", ok: false, detail });
   } else {
     const sections = Object.keys(parseState(memPath).memory).length;
     results.push({
@@ -180,12 +183,22 @@ export function renderCheckReport(results: CheckResult[]): string {
 
 /**
  * Auto-repair safe issues (TDD 4.4 --fix):
+ * - legacy memory.md (no STATE.md) → rename to STATE.md (content byte-identical)
  * - drift → regenerate CLAUDE.md from AGENTS.md (AGENTS.md is source of truth)
  * - missing zone CONTEXT.md → restore from template
- * NEVER touches STATE.md or any user content.
+ * NEVER edits STATE.md content or any user content (the rename moves bytes intact).
  */
 export function runFix(targetDir: string): string[] {
   const fixed: string[] = [];
+
+  // legacy migration: a pre-rename project has memory.md but no STATE.md.
+  // Rename is non-destructive — the user's content moves intact, never edited.
+  const statePath = join(targetDir, "STATE.md");
+  const legacyPath = join(targetDir, "memory.md");
+  if (!existsSync(statePath) && existsSync(legacyPath)) {
+    renameSync(legacyPath, statePath);
+    fixed.push("STATE.md (renamed from legacy memory.md)");
+  }
 
   const claudePath = join(targetDir, "CLAUDE.md");
   const agentsPath = join(targetDir, "AGENTS.md");
