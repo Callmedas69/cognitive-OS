@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, writeFileSync, rmSync, renameSync } from "node:fs";
 import { join } from "node:path";
-import { parseState } from "../lib/parser.js";
+import { parseStateContent } from "../lib/parser.js";
 import { safeWrite } from "../lib/fs-utils.js";
 import { ZONE_CONTEXTS } from "../templates/contexts/index.js";
 import { wireSessionHooks } from "../generators/session-hook.js";
@@ -16,7 +16,10 @@ export interface CheckResult {
 const ZONES = ["brain-dump", "queue", "focus", "projects", "ideas", "someday"];
 const HOOKS = ["start-session", "end-session", "dump"];
 const ROUTING_MARKER = "| Zone | Folder | Purpose |";
-const MEMORY_SECTIONS = 9;
+const STATE_SECTIONS = 7;
+// Soft growth flag: STATE.md is a snapshot, not a log. Past this it's drifting
+// back into an append-log — warn, but don't fail (nothing is broken).
+const STATE_SIZE_WARN_LINES = 150;
 
 function readIfExists(p: string): string | null {
   return existsSync(p) ? readFileSync(p, "utf8") : null;
@@ -36,11 +39,16 @@ export function runChecks(targetDir: string): CheckResult[] {
       : "missing";
     results.push({ label: "STATE.md", ok: false, detail });
   } else {
-    const sections = Object.keys(parseState(memPath).memory).length;
+    const content = readFileSync(memPath, "utf8");
+    const sections = Object.keys(parseStateContent(content).memory).length;
+    const lines = content.split(/\r?\n/).length;
+    const growing = lines > STATE_SIZE_WARN_LINES;
+    const sizeNote = growing ? ` — growing (${lines} lines), should be a snapshot` : "";
+    const sectionsOk = sections === STATE_SECTIONS;
     results.push({
       label: "STATE.md",
-      ok: sections === MEMORY_SECTIONS,
-      detail: sections === MEMORY_SECTIONS ? "ok" : `${sections}/${MEMORY_SECTIONS} sections`,
+      ok: sectionsOk, // size is a soft flag, never a hard failure
+      detail: sectionsOk ? `ok${sizeNote}` : `${sections}/${STATE_SECTIONS} sections${sizeNote}`,
     });
   }
 
