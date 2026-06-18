@@ -3,25 +3,21 @@ export interface StateVars {
 }
 
 /**
- * Generates STATE.md — the persistent brain (PRD 5.4).
- * 9 `## ` sections in fixed order. Current Focus is pre-filled from init Q3.
- * Maintained thereafter by agent hooks, parsed by start/check.
+ * Generates STATE.md — the persistent brain (memory-restructure add-on v1.1).
+ * A snapshot, not a log: 7 `## ` sections in fixed order, overwritten each
+ * session — history rolls to sessions/, lists live in their zone folders.
+ * Current Focus is pre-filled from init Q3. Maintained thereafter by agent
+ * hooks, parsed by start/check.
  */
 export function renderState({ projectName }: StateVars): string {
-  return `# STATE.md
+  return `# STATE.md — Current State
 
-> Persistent brain state. Every agent reads this before touching anything.
-> Updated automatically at session end. Edit by hand any time.
+> A snapshot, not a log. Overwritten each session. History lives in sessions/.
 
 ## Current Focus
 - **Project:** ${projectName}
 - **Task:** (not set yet — run \`cognitiveos start\`)
 - **Status:** just initialized
-
-## Energy & State
-- **Level:** unknown (low / med / high)
-- **Mode:** —
-- **Last active:** —
 
 ## Blockers
 - none
@@ -32,11 +28,11 @@ export function renderState({ projectName }: StateVars): string {
 ## Active Projects
 - ${projectName}
 
-## Parked Ideas
-- none
-
-## Someday/Maybe
-- none
+## Session Handoff
+- **Last worked on:** —
+- **Stopped because:** —
+- **Pick up by:** run \`cognitiveos start\`
+- **Watch out for:** —
 
 ## Recently Completed
 - cognitiveOS initialized
