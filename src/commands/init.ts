@@ -3,7 +3,7 @@ import type { AgentChoice, InitAnswers, ProjectType } from "../types.js";
 import { atomicGenerate, type GenerateResult } from "../lib/fs-utils.js";
 import { detectInstall, decideInitAction } from "../lib/detect.js";
 import { generateZones } from "../generators/zones.js";
-import { generateMemory } from "../generators/memory.js";
+import { generateState } from "../generators/state.js";
 import { generateSkillFiles } from "../generators/skill-files.js";
 import { generateAgentSkill } from "../generators/agent-skill.js";
 import { wireSessionHooks } from "../generators/session-hook.js";
@@ -85,7 +85,7 @@ function wantsClaudeHooks(agents: AgentChoice): boolean {
 
 /**
  * Write the full cognitiveOS structure into a directory, in TDD 4.1 order:
- * zones → memory → skill files → agent skill → hooks (Claude/All) → project template.
+ * zones → state → skill files → agent skill → hooks (Claude/All) → project template.
  * Pure generation — callers wrap this in atomicGenerate for atomicity.
  */
 export function generateAll(
@@ -94,7 +94,7 @@ export function generateAll(
   now: Date = new Date()
 ): void {
   generateZones(stageDir);
-  generateMemory(stageDir, answers);
+  generateState(stageDir, answers);
   generateSkillFiles(stageDir, answers);
   generateAgentSkill(stageDir, answers);
   if (wantsClaudeHooks(answers.agents)) generateHooks(stageDir);
@@ -119,7 +119,7 @@ export function runInit(
 export function renderSummary(): string {
   return [
     "✓ cognitiveOS ready. Next: open your agent and start working.",
-    "  Your agent will read memory.md automatically.",
+    "  Your agent will read STATE.md automatically.",
   ].join("\n");
 }
 

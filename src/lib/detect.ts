@@ -5,7 +5,7 @@ import { join } from "node:path";
 const SKILL_FILES = ["CLAUDE.md", "AGENTS.md"] as const;
 
 export interface InstallState {
-  /** memory.md present → cognitiveOS already initialized here. */
+  /** STATE.md (or legacy memory.md) present → cognitiveOS already initialized here. */
   initialized: boolean;
   /** Existing skill files that would conflict with generation. */
   conflicts: string[];
@@ -16,7 +16,7 @@ export type InitAction = "fresh" | "already-initialized" | "conflict";
 /** Inspect a target directory without touching it. */
 export function detectInstall(targetDir: string): InstallState {
   return {
-    initialized: existsSync(join(targetDir, "memory.md")),
+    initialized: existsSync(join(targetDir, "STATE.md")) || existsSync(join(targetDir, "memory.md")),
     conflicts: SKILL_FILES.filter((f) => existsSync(join(targetDir, f))),
   };
 }

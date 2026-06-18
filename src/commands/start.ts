@@ -1,6 +1,6 @@
 import { existsSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { parseMemory } from "../lib/parser.js";
+import { parseState } from "../lib/parser.js";
 import { renderMissionControl, type MissionControlData } from "../lib/output.js";
 
 const SESSION_FILE = /^(\d{4}-\d{2}-\d{2})\.md$/;
@@ -44,10 +44,10 @@ export function buildMissionControl(
   targetDir: string,
   now: Date = new Date()
 ): MissionControlData | null {
-  const memPath = join(targetDir, "memory.md");
+  const memPath = join(targetDir, "STATE.md");
   if (!existsSync(memPath)) return null;
 
-  const { memory } = parseMemory(memPath);
+  const { memory } = parseState(memPath);
   const lastDate = findLastSessionDate(targetDir);
 
   return {
@@ -64,7 +64,7 @@ export function buildMissionControl(
 export function startCommand(targetDir: string = process.cwd()): void {
   const data = buildMissionControl(targetDir);
   if (!data) {
-    console.log("No memory.md found. Run `cognitiveos init` first.");
+    console.log("No STATE.md found. Run `cognitiveos init` first.");
     return;
   }
   console.log(renderMissionControl(data));

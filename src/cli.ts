@@ -26,7 +26,7 @@ program
 
 program
   .command("start")
-  .description("Mission Control — show where you left off (reads memory.md).")
+  .description("Mission Control — show where you left off (reads STATE.md).")
   .option("--hook", "machine mode: read hook JSON on stdin, emit the agent injection envelope")
   .option("--agent <name>", "hook target agent: claude | antigravity")
   .action(async (opts: { hook?: boolean; agent?: string }): Promise<void> => {
@@ -49,7 +49,7 @@ program
 program
   .command("check")
   .description("Verify the cognitiveOS install is wired correctly.")
-  .option("--fix", "auto-repair detected issues (never touches memory.md/user content)")
+  .option("--fix", "auto-repair detected issues (never touches STATE.md/user content)")
   .action((opts: { fix?: boolean }): void => {
     checkCommand(process.cwd(), opts.fix ?? false);
   });

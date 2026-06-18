@@ -1,4 +1,4 @@
-import type { CurrentFocus, EnergyState, Memory } from "./parser.js";
+import type { CurrentFocus, EnergyState, State } from "./parser.js";
 
 /** A line is a `## ` header (ignoring a trailing \r and surrounding space). */
 function headerName(line: string): string | null {
@@ -62,7 +62,7 @@ function serializeEnergy(e: EnergyState): string[] {
   ];
 }
 
-const LIST_HEADERS: Partial<Record<keyof Memory, string>> = {
+const LIST_HEADERS: Partial<Record<keyof State, string>> = {
   blockers: "Blockers",
   openLoops: "Open Loops",
   activeProjects: "Active Projects",
@@ -77,11 +77,11 @@ const LIST_HEADERS: Partial<Record<keyof Memory, string>> = {
  * and any unrecognized user sections — are left byte-identical. Passing an
  * empty object returns the input unchanged.
  */
-export function writeBackMemory(content: string, updates: Partial<Memory>): string {
+export function writeBackState(content: string, updates: Partial<State>): string {
   let out = content;
   if (updates.currentFocus) out = updateSection(out, "Current Focus", serializeFocus(updates.currentFocus));
   if (updates.energyState) out = updateSection(out, "Energy & State", serializeEnergy(updates.energyState));
-  for (const [key, header] of Object.entries(LIST_HEADERS) as [keyof Memory, string][]) {
+  for (const [key, header] of Object.entries(LIST_HEADERS) as [keyof State, string][]) {
     const val = updates[key] as string[] | undefined;
     if (val !== undefined) out = updateSection(out, header, serializeList(val));
   }

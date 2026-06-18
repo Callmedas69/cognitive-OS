@@ -12,7 +12,7 @@ export interface EnergyState {
   lastActive?: string;
 }
 
-export interface Memory {
+export interface State {
   currentFocus: CurrentFocus;
   energyState: EnergyState;
   blockers: string[];
@@ -25,13 +25,13 @@ export interface Memory {
 }
 
 export interface ParseResult {
-  memory: Partial<Memory>;
+  memory: Partial<State>;
   /** Non-fatal notes: missing file, unrecognized sections, etc. */
   warnings: string[];
 }
 
-// Section header (case-insensitive) → Memory key.
-const LIST_SECTIONS: Record<string, keyof Memory> = {
+// Section header (case-insensitive) → State key.
+const LIST_SECTIONS: Record<string, keyof State> = {
   blockers: "blockers",
   "open loops": "openLoops",
   "active projects": "activeProjects",
@@ -81,10 +81,10 @@ function listItems(lines: string[]): string[] {
   return items;
 }
 
-/** Parse memory.md content. Never throws — malformed input yields a partial result + warnings. */
-export function parseMemoryContent(content: string): ParseResult {
+/** Parse STATE.md content. Never throws — malformed input yields a partial result + warnings. */
+export function parseStateContent(content: string): ParseResult {
   const warnings: string[] = [];
-  const memory: Partial<Memory> = {};
+  const memory: Partial<State> = {};
   const sections = sectionize(content);
 
   if (sections.size === 0) {
@@ -121,10 +121,10 @@ export function parseMemoryContent(content: string): ParseResult {
   return { memory, warnings };
 }
 
-/** Read + parse memory.md from disk. Missing file → empty result + warning, never throws. */
-export function parseMemory(filePath: string): ParseResult {
+/** Read + parse STATE.md from disk. Missing file → empty result + warning, never throws. */
+export function parseState(filePath: string): ParseResult {
   if (!existsSync(filePath)) {
-    return { memory: {}, warnings: [`memory.md not found at ${filePath}`] };
+    return { memory: {}, warnings: [`STATE.md not found at ${filePath}`] };
   }
-  return parseMemoryContent(readFileSync(filePath, "utf8"));
+  return parseStateContent(readFileSync(filePath, "utf8"));
 }

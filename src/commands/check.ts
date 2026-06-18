@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, writeFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
-import { parseMemory } from "../lib/parser.js";
+import { parseState } from "../lib/parser.js";
 import { safeWrite } from "../lib/fs-utils.js";
 import { ZONE_CONTEXTS } from "../templates/contexts/index.js";
 import { wireSessionHooks } from "../generators/session-hook.js";
@@ -28,14 +28,14 @@ export function runChecks(targetDir: string): CheckResult[] {
   const claude = readIfExists(join(targetDir, "CLAUDE.md"));
   const agents = readIfExists(join(targetDir, "AGENTS.md"));
 
-  // 1. memory.md exists and parses with all 9 sections
-  const memPath = join(targetDir, "memory.md");
+  // 1. STATE.md exists and parses with all sections
+  const memPath = join(targetDir, "STATE.md");
   if (!existsSync(memPath)) {
-    results.push({ label: "memory.md", ok: false, detail: "missing" });
+    results.push({ label: "STATE.md", ok: false, detail: "missing" });
   } else {
-    const sections = Object.keys(parseMemory(memPath).memory).length;
+    const sections = Object.keys(parseState(memPath).memory).length;
     results.push({
-      label: "memory.md",
+      label: "STATE.md",
       ok: sections === MEMORY_SECTIONS,
       detail: sections === MEMORY_SECTIONS ? "ok" : `${sections}/${MEMORY_SECTIONS} sections`,
     });
@@ -182,7 +182,7 @@ export function renderCheckReport(results: CheckResult[]): string {
  * Auto-repair safe issues (TDD 4.4 --fix):
  * - drift → regenerate CLAUDE.md from AGENTS.md (AGENTS.md is source of truth)
  * - missing zone CONTEXT.md → restore from template
- * NEVER touches memory.md or any user content.
+ * NEVER touches STATE.md or any user content.
  */
 export function runFix(targetDir: string): string[] {
   const fixed: string[] = [];
