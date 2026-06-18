@@ -1,4 +1,4 @@
-import inquirer from "inquirer";
+import { intro, outro, select, text, note, log, isCancel, cancel } from "@clack/prompts";
 import type { AgentChoice, InitAnswers, ProjectType } from "../types.js";
 import { atomicGenerate, type GenerateResult } from "../lib/fs-utils.js";
 import { detectInstall, decideInitAction } from "../lib/detect.js";
@@ -10,6 +10,7 @@ import { wireSessionHooks } from "../generators/session-hook.js";
 import { generateHooks } from "../generators/hooks.js";
 import { generateProjectTemplate } from "../generators/project-template.js";
 import { generateFirstSession } from "../generators/session.js";
+import { renderWordmark, brandLine, emerald, coral, muted } from "../lib/theme.js";
 
 // Minimal prompt signature — lets tests inject a fake without a TTY.
 export type PromptFn = (questions: unknown) => Promise<RawAnswers>;
@@ -37,7 +38,7 @@ export function buildQuestions() {
     {
       type: "list",
       name: "agents",
-      message: "Which AI agent(s) do you use?",
+      message: "[1/3] Which AI agent(s) do you use?",
       choices: [
         { name: "Claude Code", value: "claude-code" },
         { name: "Codex CLI", value: "codex" },
@@ -49,13 +50,13 @@ export function buildQuestions() {
     {
       type: "list",
       name: "projectType",
-      message: "Project type?",
+      message: "[2/3] Project type?",
       choices: ["blockchain", "fullstack", "cli-tool", "content", "mixed"],
     },
     {
       type: "input",
       name: "projectName",
-      message: "What's your current active project?",
+      message: "[3/3] What's your current active project?",
       validate: (v: string) => (v.trim().length > 0 ? true : "Project name can't be empty"),
     },
   ];
@@ -70,10 +71,53 @@ export function normalizeAnswers(raw: RawAnswers): InitAnswers {
   };
 }
 
+/** Abort cleanly on Ctrl-C / Esc at any clack prompt. */
+function bailIfCancelled(value: unknown): void {
+  if (isCancel(value)) {
+    cancel("Cancelled — nothing was written.");
+    process.exit(0);
+  }
+}
+
+/**
+ * Default prompt driver: the 3-question wizard via @clack/prompts (the left-rail
+ * UI). buildQuestions() stays the single source of labels/choices. Tests inject a
+ * fake PromptFn instead, so this never needs a TTY under test.
+ */
+async function clackPrompt(_questions?: unknown): Promise<RawAnswers> {
+  const q = buildQuestions();
+
+  const agents = await select({
+    message: q[0].message,
+    options: (q[0].choices as { name: string; value: string }[]).map((c) => ({
+      value: c.value,
+      label: c.name,
+    })),
+  });
+  bailIfCancelled(agents);
+
+  const projectType = await select({
+    message: q[1].message,
+    options: (q[1].choices as string[]).map((s) => ({ value: s, label: s })),
+  });
+  bailIfCancelled(projectType);
+
+  const projectName = await text({
+    message: q[2].message,
+    placeholder: "my-project",
+    validate: (v) => (v.trim().length > 0 ? undefined : "Project name can't be empty"),
+  });
+  bailIfCancelled(projectName);
+
+  return {
+    agents: agents as AgentChoice,
+    projectType: projectType as ProjectType,
+    projectName: projectName as string,
+  };
+}
+
 /** Run the 3-question wizard. Prompt fn is injectable for testing. */
-export async function runWizard(
-  prompt: PromptFn = inquirer.prompt as unknown as PromptFn
-): Promise<InitAnswers> {
+export async function runWizard(prompt: PromptFn = clackPrompt): Promise<InitAnswers> {
   const raw = await prompt(buildQuestions());
   return normalizeAnswers(raw);
 }
@@ -115,26 +159,31 @@ export function runInit(
   return atomicGenerate(targetDir, (stage) => generateAll(stage, answers, now));
 }
 
-/** Success summary printed after init (TDD 4.1 step 5). */
-export function renderSummary(): string {
+/** Success summary printed after init (TDD 4.1 step 5; TUI add-on A.2). */
+export function renderSummary(projectDir: string): string {
   return [
-    "✓ cognitiveOS ready. Next: open your agent and start working.",
-    "  Your agent will read STATE.md automatically.",
+    emerald(`✓ cognitiveOS ready in ${projectDir}`),
+    emerald("→  Next: open your agent and start working."),
+    muted("   It already knows your context."),
   ].join("\n");
 }
 
 /**
- * The `cognitiveos init` command entry. Detects existing installs (worktree
- * strategy — never overwrites), runs the wizard, generates. Prompt fn and cwd
- * are injectable for testing. (Success summary + first session log: T-018.)
+ * The `cognitiveos init` command entry. Prints the wordmark, then runs the
+ * clack-rail wizard (detects existing installs — worktree strategy, never
+ * overwrites — generates, wires hooks). Prompt fn and cwd are injectable.
  */
 export async function initCommand(
   cwd: string = process.cwd(),
   prompt?: PromptFn
 ): Promise<void> {
+  console.log("\n" + renderWordmark() + "\n");
+  intro(brandLine());
+
   const action = decideInitAction(detectInstall(cwd));
   if (action === "already-initialized") {
-    console.log("cognitiveOS already initialized here. Run `cognitiveos check` instead.");
+    log.warn("cognitiveOS already initialized here. Run `cognitiveos check` instead.");
+    outro(muted("Nothing to do."));
     return;
   }
 
@@ -142,7 +191,7 @@ export async function initCommand(
   const result = runInit(cwd, answers);
 
   if (result.conflicts.length > 0) {
-    console.log(`Kept ${result.conflicts.length} existing file(s): ${result.conflicts.join(", ")}`);
+    log.warn(coral(`Kept ${result.conflicts.length} existing file(s): ${result.conflicts.join(", ")}`));
   }
 
   // Post-generation: merge the deterministic session-start hook into each
@@ -150,13 +199,12 @@ export async function initCommand(
   // idempotency — deliberately outside runInit's atomic never-overwrite stage).
   const hooks = wireSessionHooks(cwd, answers);
   if (hooks.wired.length > 0) {
-    console.log(`Session hook wired: ${hooks.wired.join(", ")}`);
+    log.success(`Session hook wired: ${hooks.wired.join(", ")}`);
   }
   for (const m of hooks.manual) {
-    console.log(
-      `\n⚠ Could not edit ${m.file} (unreadable JSON). Add this hook manually:\n${m.snippet}\n`
-    );
+    log.warn(coral(`Could not edit ${m.file} (unreadable JSON). Add this hook manually:`));
+    note(m.snippet, "hook snippet");
   }
 
-  console.log(renderSummary());
+  outro(renderSummary(cwd));
 }

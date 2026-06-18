@@ -54,10 +54,11 @@ describe("generateFirstSession", () => {
   });
 });
 
-describe("renderSummary (TDD 4.1)", () => {
-  it("tells the user it's ready and that the agent reads STATE.md", () => {
-    const out = renderSummary();
-    expect(out).toContain("cognitiveOS ready");
-    expect(out).toContain("STATE.md");
+describe("renderSummary (TDD 4.1; TUI add-on A.2)", () => {
+  it("tells the user it's ready, names the project dir, and points to the next action", () => {
+    const out = renderSummary("/path/to/proj");
+    expect(out).toContain("cognitiveOS ready in");
+    expect(out).toContain("/path/to/proj");
+    expect(out).toContain("It already knows your context.");
   });
 });

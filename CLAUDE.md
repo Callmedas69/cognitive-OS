@@ -84,7 +84,7 @@ The shipped CLI exposes 4 subcommands: `init`, `start`, `dump`, `check` (`check 
 - **Language:** TypeScript, ESM (`type: module`), Node >=18
 - **Build:** tsup (`src/cli.ts` → `dist/`, `bin` points to `dist/cli.js`)
 - **Test:** vitest (temp dirs for integration tests of init/check)
-- **Runtime deps — exactly 3:** `commander` (arg parsing), `inquirer` (3-question wizard), `chalk` (Mission Control colors). Every added dep is a maintenance liability for a solo dev — do not add a 4th without strong reason.
+- **Runtime deps — exactly 3:** `commander` (arg parsing), `@clack/prompts` (3-question wizard — the left-rail UI; replaced `inquirer`), `chalk` (wordmark gradient + Mission Control colors). Every added dep is a maintenance liability for a solo dev — do not add a 4th without strong reason.
 
 ## Architecture
 

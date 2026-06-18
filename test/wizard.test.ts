@@ -22,6 +22,13 @@ describe("buildQuestions", () => {
     expect(q.length).toBe(3);
     expect(q.map((x) => x.name)).toEqual(["agents", "projectType", "projectName"]);
   });
+
+  it("labels each prompt with its step [n/3] (TUI add-on A.2)", () => {
+    const msgs = buildQuestions().map((x) => x.message);
+    expect(msgs[0].startsWith("[1/3] ")).toBe(true);
+    expect(msgs[1].startsWith("[2/3] ")).toBe(true);
+    expect(msgs[2].startsWith("[3/3] ")).toBe(true);
+  });
 });
 
 describe("normalizeAnswers", () => {
