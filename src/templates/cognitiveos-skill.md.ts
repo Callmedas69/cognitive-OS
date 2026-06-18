@@ -7,7 +7,7 @@ export interface SkillVars {
 /**
  * The canonical cognitiveOS operating manual — identical body across every
  * agent. Only the frontmatter differs per agent (see wrappers below). Agent-
- * agnostic on purpose: leans on the cross-platform CLI commands + the memory.md
+ * agnostic on purpose: leans on the cross-platform CLI commands + the STATE.md
  * workflow, so it reads the same whether loaded by Claude Code, Codex, Cursor,
  * or Antigravity.
  */
@@ -15,15 +15,16 @@ export function renderSkillBody({ projectName }: SkillVars): string {
   return `# cognitiveOS — operating manual
 
 This project uses **cognitiveOS**: an ICM (Interpreted Context Methodology)
-filesystem where each folder is one cognitive mode and \`memory.md\` is the
+filesystem where each folder is one cognitive mode and \`STATE.md\` is the
 persistent brain. Follow this every session.
 
 ## At session start — ALWAYS
 
-Read \`memory.md\` in the project root **before doing anything else**. It holds:
-current focus, energy state, blockers, open loops, and active projects. Then
-show the user: current focus, open loops (max 3), blockers, last session date,
-and ONE suggested next action. Do not ask questions — just show the state.
+Read \`STATE.md\` in the project root **before doing anything else**. It holds:
+current focus, blockers, open loops, the session handoff, and active projects.
+Then show the user the **Session Handoff "pick up" line first**, then current
+focus, open loops (max 3), blockers, and last session date. Do not ask
+questions — just show the state.
 
 Active project: **${projectName}** (\`projects/${projectName}/\`).
 
@@ -43,7 +44,7 @@ Each folder has a \`CONTEXT.md\`. Read it before acting in that zone.
 
 ## Commands (work in any agent)
 
-- \`cognitiveos start\` — Mission Control: where you left off, from \`memory.md\`.
+- \`cognitiveos start\` — Mission Control: where you left off, from \`STATE.md\`.
 - \`cognitiveos dump "<thought>"\` — capture anything to \`brain-dump/inbox.md\`. Never blocks.
 - \`cognitiveos check\` (\`--fix\`) — verify the install is wired; repair drift.
 
@@ -59,19 +60,20 @@ ${LOOP_BLOCK}
 
 ## At session end — ALWAYS
 
-Update \`memory.md\` (Current Focus, Blockers, Open Loops, Recently Completed)
-from what happened, then append a short entry (under 10 lines) to
-\`sessions/YYYY-MM-DD.md\`: timestamp, completed work, open loops, next action.
-Never edit past session logs.
+Update \`STATE.md\` (Current Focus, Blockers, Open Loops, Session Handoff,
+Recently Completed) from what happened. Write the Session Handoff so the next
+session knows exactly where to resume. Then append a short entry (under 10
+lines) to \`sessions/YYYY-MM-DD.md\`: timestamp, completed work, open loops,
+next action. Never edit past session logs.
 `;
 }
 
 const SKILL_DESCRIPTION =
-  "Operating manual for a cognitiveOS project (memory.md + zone filesystem). " +
-  "Use at the start of any work session to load memory.md and the current focus, " +
+  "Operating manual for a cognitiveOS project (STATE.md + zone filesystem). " +
+  "Use at the start of any work session to load STATE.md and the current focus, " +
   "to route a task to the right zone (brain-dump, queue, focus, projects, ideas, someday), " +
   "to enforce the one-task and ADHD response rules, and at session end to update " +
-  "memory.md and append a session log.";
+  "STATE.md and append a session log.";
 
 /**
  * Claude Code + Codex CLI share the identical SKILL.md format (dir + SKILL.md,
@@ -92,7 +94,7 @@ ${renderSkillBody(vars)}`;
  */
 export function renderCursorRule(vars: SkillVars): string {
   return `---
-description: cognitiveOS project operating manual — read memory.md, route to zones, enforce one-task + ADHD rules, update state at session end.
+description: cognitiveOS project operating manual — read STATE.md, route to zones, enforce one-task + ADHD rules, update state at session end.
 alwaysApply: true
 ---
 

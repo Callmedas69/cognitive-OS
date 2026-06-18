@@ -27,7 +27,7 @@ Open your AI agent and start working — it already knows your context.
 ```
 your-project/
 ├── CLAUDE.md / AGENTS.md   ← routing table — your agent reads this automatically
-├── memory.md               ← persistent brain: focus, blockers, open loops
+├── STATE.md                ← persistent brain: focus, blockers, open loops, handoff
 ├── brain-dump/             ← capture everything, no filter
 ├── queue/                  ← what's next, already sorted
 ├── focus/                  ← the ONE thing right now (one task, enforced)
@@ -39,7 +39,7 @@ your-project/
 
 `init` also installs a **cognitiveOS agent skill** (`SKILL.md` for Claude Code / Codex / Antigravity, a `.mdc` rule for Cursor) — the operating manual your agent triggers automatically. It carries the zone routing, the one-task + ADHD response rules, and a silent **work loop**: read state → one action → update → re-read.
 
-Your agent reads `memory.md` at session start and updates it at session end — automatically. You never run a "save" command.
+Your agent reads `STATE.md` at session start and updates it at session end — automatically. You never run a "save" command.
 
 **This is not a productivity system. It's a cognitive prosthetic.** A productivity system asks you to maintain it. This maintains itself.
 
@@ -74,12 +74,12 @@ function cd { Set-Location @args; cognitiveos start 2>$null }
 
 ## Loads itself at session start
 
-For Claude Code and Antigravity, `init` wires a **deterministic session hook** so your agent loads `memory.md` the moment a session opens — zero typing, can't be skipped. `check` verifies the wiring stays in place; `check --fix` restores it.
+For Claude Code and Antigravity, `init` wires a **deterministic session hook** so your agent loads `STATE.md` the moment a session opens — zero typing, can't be skipped. `check` verifies the wiring stays in place; `check --fix` restores it.
 
 - **Claude Code** → `.claude/settings.json` (`SessionStart`)
 - **Antigravity** → `.agents/hooks.json` (`PreInvocation`)
 
-If the hook ever misfires, nothing breaks — the agent skill still tells your agent to read `memory.md` first thing.
+If the hook ever misfires, nothing breaks — the agent skill still tells your agent to read `STATE.md` first thing.
 
 ---
 
@@ -87,9 +87,9 @@ If the hook ever misfires, nothing breaks — the agent skill still tells your a
 
 | Agent | Skill / rule it loads | Session-start hook |
 |-------|------------------------|--------------------|
-| Claude Code | `.claude/skills/cognitiveos/SKILL.md` + slash hooks `/start-session` `/end-session` `/dump` | ✅ auto-loads `memory.md` |
+| Claude Code | `.claude/skills/cognitiveos/SKILL.md` + slash hooks `/start-session` `/end-session` `/dump` | ✅ auto-loads `STATE.md` |
 | Codex CLI | `.codex/skills/cognitiveos/SKILL.md` (+ `AGENTS.md`) | — |
-| Antigravity | `.agents/skills/cognitiveos/SKILL.md` (+ `AGENTS.md`) | ✅ auto-loads `memory.md` |
+| Antigravity | `.agents/skills/cognitiveos/SKILL.md` (+ `AGENTS.md`) | ✅ auto-loads `STATE.md` |
 | Cursor / Windsurf | `.cursor/rules/cognitiveos.mdc` (+ `AGENTS.md`) | — |
 
 > `init` never overwrites or deletes your files — existing configs and skill files are kept and merged, not clobbered.

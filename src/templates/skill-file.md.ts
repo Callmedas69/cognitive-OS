@@ -31,9 +31,9 @@ export function renderSkillFile({ projectName, projectType }: SkillFileVars): st
 
   return `# cognitiveOS — Project Map & Routing Table
 
-## Memory
-Read memory.md before starting ANY task. It contains:
-current focus, energy state, blockers, open loops, active projects.
+## State
+Read STATE.md before starting ANY task. It contains:
+current focus, blockers, open loops, session handoff, active projects.
 
 Full session workflow: the **cognitiveos** skill (auto-loaded by your agent).
 
@@ -57,8 +57,8 @@ ${blockchainBlock}
 - Max 3 action items per response
 - Max 1 question per response
 - current-task.md holds ONE task only — enforce this, always
-- Session start: read memory.md, show current focus + open loops
-- Session end: update memory.md + append to sessions/YYYY-MM-DD.md
+- Session start: read STATE.md, show current focus + open loops
+- Session end: update STATE.md + append to sessions/YYYY-MM-DD.md
 
 ${LOOP_BLOCK}
 `;

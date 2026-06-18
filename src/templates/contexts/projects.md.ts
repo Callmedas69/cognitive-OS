@@ -13,7 +13,7 @@ The relevant projects/[name]/ folder and its own CONTEXT.md files.
 - One action at a time — re-read state before the next.
 
 ## Output
-Update the project's working files and its memory.md focus line.
+Update the project's working files and its STATE.md focus line.
 
 ## Handoff
 Pause a project → move notes to someday/. Finish → log to sessions/.

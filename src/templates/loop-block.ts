@@ -13,7 +13,7 @@ export const LOOP_BLOCK = `${LOOP_MARKER}
 When working on tasks in this project (not for quick questions), follow this
 rhythm — silently, without narrating it:
 
-1. Read the state first. Before acting, read memory.md, the CONTEXT.md of the
+1. Read the state first. Before acting, read STATE.md, the CONTEXT.md of the
    zone you're in, and focus/current-task.md. Know the current focus, blockers,
    and open loops before doing anything.
 
@@ -23,7 +23,7 @@ rhythm — silently, without narrating it:
    score them, and recommend ONE.
 
 3. Do it, then update the state. After the action, update current-task.md and
-   memory.md if anything changed. Log to sessions/ if it mattered.
+   STATE.md if anything changed. Log to sessions/ if it mattered.
 
 4. Re-read the state before the next action. Don't assume multiple steps ahead.
 

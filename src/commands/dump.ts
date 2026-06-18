@@ -8,7 +8,7 @@ import { formatDate, formatTime } from "../lib/session.js";
 /**
  * Append a timestamped line to brain-dump/inbox.md. Deliberately tiny: it only
  * touches the inbox, so it NEVER fails because of unrelated broken state
- * (corrupt memory.md, missing zones, etc.). Creates the folder/file if absent.
+ * (corrupt STATE.md, missing zones, etc.). Creates the folder/file if absent.
  */
 export function appendDump(targetDir: string, text: string, now: Date = new Date()): void {
   const dir = join(targetDir, "brain-dump");

@@ -8,7 +8,7 @@ function stageContext(folder: string, role: string): string {
 ${role}
 
 ## Input
-Files in this stage folder + the project's memory.md focus.
+Files in this stage folder + the project's STATE.md focus.
 
 ## Rules
 - Stay in this stage's job. Hand off, don't sprawl.

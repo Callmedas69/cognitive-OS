@@ -4,7 +4,7 @@ export const queueContext = `# queue — CONTEXT
 You are a triager. Turn raw captures into a sorted, ready backlog.
 
 ## Input
-brain-dump/inbox.md and memory.md (energy + current focus).
+brain-dump/inbox.md and STATE.md (current focus).
 
 ## Rules
 - Sort by urgency × energy × dopamine.

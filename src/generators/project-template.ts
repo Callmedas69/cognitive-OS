@@ -11,11 +11,11 @@ function projectRootContext(name: string): string {
 Steward of the ${name} project.
 
 ## Input
-This project's files + memory.md current focus.
+This project's files + STATE.md current focus.
 
 ## Rules
 - Max 3 action items, max 1 question per response.
-- Keep memory.md's focus line current as work moves.
+- Keep STATE.md's focus line current as work moves.
 
 ## Output
 Update this project's working files.
