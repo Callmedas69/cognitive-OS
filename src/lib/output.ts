@@ -6,6 +6,10 @@ export interface MissionControlData {
   blocker?: string;
   next: string;
   recent?: string;
+  /** Session Handoff "pick up by" — the single next action. Headline when present. */
+  pickUp?: string;
+  /** Session Handoff "stopped because" — subtext under the pick-up line. */
+  pickUpReason?: string;
 }
 
 const INNER = 56; // content width → total line 60 cols, well under 80
@@ -35,6 +39,14 @@ export function renderMissionControl(d: MissionControlData): string {
   const blank = row("");
 
   const lines: string[] = [top, blank];
+
+  // PICK UP (headline — the next action from Session Handoff; what an ADHD user
+  // needs first: not "here's your state" but "here's literally the next thing").
+  if (d.pickUp) {
+    lines.push(row(`➡ PICK UP  ${d.pickUp}`));
+    if (d.pickUpReason) lines.push(row(`${" ".repeat(LABEL)}stopped: ${d.pickUpReason}`));
+    lines.push(blank);
+  }
 
   // FOCUS
   lines.push(field("FOCUS", d.focus?.task ?? "(no task set)"));

@@ -50,6 +50,10 @@ export function buildMissionControl(
   const { memory } = parseState(memPath);
   const lastDate = findLastSessionDate(targetDir);
 
+  // Template placeholders ("—") count as empty so they never surface as a headline.
+  const clean = (s?: string): string | undefined => (s && s.trim() !== "—" ? s.trim() : undefined);
+  const handoff = memory.sessionHandoff;
+
   return {
     focus: memory.currentFocus,
     lastSession: lastDate ? relativeSession(parseSessionDate(lastDate), now) : undefined,
@@ -57,6 +61,8 @@ export function buildMissionControl(
     blocker: memory.blockers?.[0],
     next: "Open focus/current-task.md",
     recent: memory.recentlyCompleted?.[0],
+    pickUp: clean(handoff?.pickUpBy),
+    pickUpReason: clean(handoff?.stoppedBecause),
   };
 }
 

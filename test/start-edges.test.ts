@@ -46,6 +46,45 @@ describe("edge: 7+ day gap (show only, no prompt)", () => {
   });
 });
 
+describe("Session Handoff → PICK UP headline", () => {
+  it("surfaces pickUpBy + stoppedBecause and renders the headline first", () => {
+    writeFileSync(
+      join(dir, "STATE.md"),
+      [
+        "## Current Focus",
+        "- **Task:** wallet bug",
+        "## Session Handoff",
+        "- **Stopped because:** waiting on RPC key",
+        "- **Pick up by:** wire the deploy script",
+      ].join("\n")
+    );
+    const data = buildMissionControl(dir, new Date(2026, 5, 13))!;
+    expect(data.pickUp).toBe("wire the deploy script");
+    expect(data.pickUpReason).toBe("waiting on RPC key");
+
+    const out = renderMissionControl(data);
+    expect(out).toContain("➡ PICK UP  wire the deploy script");
+    // headline appears before FOCUS
+    expect(out.indexOf("PICK UP")).toBeLessThan(out.indexOf("FOCUS"));
+  });
+
+  it("treats the '—' template placeholder as empty (no headline)", () => {
+    writeFileSync(
+      join(dir, "STATE.md"),
+      [
+        "## Current Focus",
+        "- **Task:** t",
+        "## Session Handoff",
+        "- **Stopped because:** —",
+        "- **Pick up by:** —",
+      ].join("\n")
+    );
+    const data = buildMissionControl(dir, new Date(2026, 5, 13))!;
+    expect(data.pickUp).toBeUndefined();
+    expect(renderMissionControl(data)).not.toContain("PICK UP");
+  });
+});
+
 describe("edge: empty sections", () => {
   it("renders gracefully with no loops, no blocker, no recent, no task", () => {
     writeFileSync(
