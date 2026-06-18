@@ -26,7 +26,7 @@ Specs are NOT in this repo. They live in the Obsidian vault:
 One module per session, strict order, each independently testable:
 1. Repo scaffold + `package.json` + tsup/tsconfig + commander wiring
 2. `src/templates/` — all markdown templates as JS strings
-3. `src/generators/` — zones, memory, skill-files, hooks
+3. `src/generators/` — zones, state, skill-files, hooks
 4. `src/commands/init.ts` — wizard + atomic generation + worktree handling
 5. `src/lib/parser.ts` + `src/commands/start.ts`
 6. `src/commands/dump.ts` + `src/commands/check.ts` (+ `--fix`)
@@ -50,8 +50,8 @@ One module per session, strict order, each independently testable:
 
 Autonomous grind allowed **only** on mechanical, well-specified, independently-testable bands with no human gate:
 
-- **T-006 → T-010** — templates (skill-file, memory, zone CONTEXTs, hooks, project-types)
-- **T-011 → T-014** — generators (fs-utils, zones, memory/skill/hooks, project-template)
+- **T-006 → T-010** — templates (skill-file, state, zone CONTEXTs, hooks, project-types)
+- **T-011 → T-014** — generators (fs-utils, zones, state/skill/hooks, project-template)
 
 Loop does one task, runs its tests, commits on green, continues. Everything outside these bands is manual.
 
@@ -90,12 +90,12 @@ The shipped CLI exposes 4 subcommands: `init`, `start`, `dump`, `check` (`check 
 
 CLI generates files once, then gets out of the way. Layering:
 
-- `src/commands/` — the 4 subcommands. `init` orchestrates generators; `start` reads memory.md and renders Mission Control; `dump` appends to inbox; `check` detects silent failures.
-- `src/generators/` — turn templates into files on disk (zones, memory, skill-files, hooks, project-template).
+- `src/commands/` — the 4 subcommands. `init` orchestrates generators; `start` reads STATE.md and renders Mission Control; `dump` appends to inbox; `check` detects silent failures.
+- `src/generators/` — turn templates into files on disk (zones, state, skill-files, hooks, project-template).
 - `src/templates/` — all markdown as typed JS string functions (`contexts/`, `hooks/`, `project-types/`). No file fixtures — templates are code.
-- `src/lib/` — `fs-utils.ts` (safe/atomic writes), `parser.ts` (memory.md section parser), `output.ts` (chalk formatting).
+- `src/lib/` — `fs-utils.ts` (safe/atomic writes), `parser.ts` (STATE.md section parser), `output.ts` (chalk formatting).
 
-**What `init` generates** in a user's project: `CLAUDE.md` + `AGENTS.md` (identical routing tables, including the shared `LOOP_BLOCK`), `memory.md`, 6 zone folders each with `CONTEXT.md` (brain-dump, queue, focus, projects, ideas, someday), `.claude/commands/` slash hooks, the **agent skill** per selected agent (`.claude`/`.codex`/`.agents/skills/cognitiveos/SKILL.md` + `.cursor/rules/cognitiveos.mdc`), the **session-start hook** wiring (`.claude/settings.json` + `.agents/hooks.json`), `sessions/`, and `projects/[name]/` from a project-type template.
+**What `init` generates** in a user's project: `CLAUDE.md` + `AGENTS.md` (identical routing tables, including the shared `LOOP_BLOCK`), `STATE.md`, 6 zone folders each with `CONTEXT.md` (brain-dump, queue, focus, projects, ideas, someday), `.claude/commands/` slash hooks, the **agent skill** per selected agent (`.claude`/`.codex`/`.agents/skills/cognitiveos/SKILL.md` + `.cursor/rules/cognitiveos.mdc`), the **session-start hook** wiring (`.claude/settings.json` + `.agents/hooks.json`), `sessions/`, and `projects/[name]/` from a project-type template.
 
 Beyond the 4 user commands, `start` has a machine-only `--hook --agent=<claude|antigravity>` mode (reads hook stdin, emits the agent's session-start envelope; never throws). Generators: `src/generators/agent-skill.ts` (skill files), `src/generators/session-hook.ts` (backup-safe config merge). Templates: `src/templates/cognitiveos-skill.md.ts`, `src/templates/loop-block.ts`.
 
@@ -107,8 +107,8 @@ These come from the ADHD design principles and premortem — violating them brea
 - **Atomic generation.** Write to a temp dir, move on success. A failed step leaves zero partial files. Re-running `init` is idempotent — never duplicates content.
 - **`dump` must never fail** because of unrelated broken state. It only appends to `brain-dump/inbox.md`. Zero decisions, no prompts.
 - **One-task invariant.** `focus/current-task.md` holds exactly 0 or 1 task. The skill-file rules and `check` both enforce it.
-- **`CLAUDE.md` and `AGENTS.md` are identical.** `init` generates both; `check` detects drift; `check --fix` regenerates CLAUDE.md from AGENTS.md. `--fix` NEVER touches `memory.md` or user content.
-- **Parser is tolerant — never throws.** Malformed memory.md → partial parse + warnings array. Write-back is section-surgical: only modified `## ` sections rewritten, unknown sections preserved byte-identical.
+- **`CLAUDE.md` and `AGENTS.md` are identical.** `init` generates both; `check` detects drift; `check --fix` regenerates CLAUDE.md from AGENTS.md. `--fix` NEVER touches `STATE.md` or user content.
+- **Parser is tolerant — never throws.** Malformed STATE.md → partial parse + warnings array. Write-back is section-surgical: only modified `## ` sections rewritten, unknown sections preserved byte-identical.
 - **No symlinks. Anywhere. Ever.** (Windows admin problem.) Both agent files are standalone — no `@import`.
 
 ## Cross-platform (TDD §7)
@@ -126,7 +126,7 @@ MCP server, Next.js dashboard, database/network/telemetry, monetization code, Co
 
 ## ADHD build rules (the builder is the user)
 
-- One module per session. Finish it or leave a note in memory.md. Never two in parallel.
+- One module per session. Finish it or leave a note in STATE.md. Never two in parallel.
 - Stuck >30 min → write the blocker, switch to the smallest next task.
 - Ship ugly, working code over beautiful, unfinished code.
 - Hard gate ⛔ before week 2: 10 real ADHD devs must have run `init`. Do not write week 2 code until the gate clears.
