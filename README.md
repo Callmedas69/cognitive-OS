@@ -81,6 +81,11 @@ For Claude Code and Antigravity, `init` wires a **deterministic session hook** s
 
 If the hook ever misfires, nothing breaks — the agent skill still tells your agent to read `STATE.md` first thing.
 
+> **Tip — make it instant & offline:** the hook runs `npx cognitiveos start --hook`, which resolves a locally- or globally-installed copy before reaching the network. Install once so session-start never fetches and works offline:
+> ```bash
+> npm i -g cognitiveos
+> ```
+
 ---
 
 ## Works with

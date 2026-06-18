@@ -1,4 +1,4 @@
-import { intro, outro, select, text, note, log, isCancel, cancel } from "@clack/prompts";
+import { intro, outro, select, text, confirm, note, log, isCancel, cancel } from "@clack/prompts";
 import type { AgentChoice, InitAnswers, ProjectType } from "../types.js";
 import { atomicGenerate, type GenerateResult } from "../lib/fs-utils.js";
 import { detectInstall, decideInitAction } from "../lib/detect.js";
@@ -180,11 +180,28 @@ export async function initCommand(
   console.log("\n" + renderWordmark() + "\n");
   intro(brandLine());
 
-  const action = decideInitAction(detectInstall(cwd));
+  const install = detectInstall(cwd);
+  const action = decideInitAction(install);
   if (action === "already-initialized") {
     log.warn("cognitiveOS already initialized here. Run `cognitiveos check` instead.");
     outro(muted("Nothing to do."));
     return;
+  }
+
+  // Conflict: this folder already has skill files (CLAUDE.md/AGENTS.md) but no
+  // STATE.md — likely a real codebase. Never silently scaffold over it (PRD OQ4);
+  // show what's here and let the user opt in. Existing files are never overwritten.
+  if (action === "conflict") {
+    log.warn(coral(`This folder already has: ${install.conflicts.join(", ")}.`));
+    note("cognitiveOS adds its files alongside yours and never overwrites them.", "heads up");
+    const go = await confirm({
+      message: "Scaffold cognitiveOS into this folder anyway?",
+      initialValue: false,
+    });
+    if (isCancel(go) || go !== true) {
+      cancel("Cancelled — nothing written.");
+      return;
+    }
   }
 
   const answers = await runWizard(prompt);
@@ -200,6 +217,10 @@ export async function initCommand(
   const hooks = wireSessionHooks(cwd, answers);
   if (hooks.wired.length > 0) {
     log.success(`Session hook wired: ${hooks.wired.join(", ")}`);
+    note(
+      "Run `npm i -g cognitiveos` so session-start is instant and works offline\n(otherwise npx fetches it on first run).",
+      "tip"
+    );
   }
   for (const m of hooks.manual) {
     log.warn(coral(`Could not edit ${m.file} (unreadable JSON). Add this hook manually:`));

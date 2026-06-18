@@ -34,7 +34,7 @@ function wireClaude(targetDir: string, res: SessionHookResult): void {
   const rel = ".claude/settings.json";
   const path = join(targetDir, ".claude", "settings.json");
   const entry = {
-    hooks: [{ type: "command", command: `npx ${MARKER} --agent=claude` }],
+    hooks: [{ type: "command", command: `npx -y ${MARKER} --agent=claude` }],
   };
   const full = { hooks: { SessionStart: [entry] } };
   const snippet = JSON.stringify(full, null, 2);
@@ -66,7 +66,7 @@ function wireAntigravity(targetDir: string, res: SessionHookResult): void {
   const rel = ".agents/hooks.json";
   const path = join(targetDir, ".agents", "hooks.json");
   const hookObj = {
-    PreInvocation: [{ type: "command", command: `npx ${MARKER} --agent=antigravity` }],
+    PreInvocation: [{ type: "command", command: `npx -y ${MARKER} --agent=antigravity` }],
   };
   const full = { "cognitiveos-session": hookObj };
   const snippet = JSON.stringify(full, null, 2);
