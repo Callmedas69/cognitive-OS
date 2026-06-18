@@ -30,6 +30,16 @@ describe("runSessionHook", () => {
     expect(parsed.hookSpecificOutput.additionalContext).toContain("Ship the session hook");
   });
 
+  it("leads the envelope with the PICK UP action when a handoff is present", () => {
+    writeFileSync(
+      join(dir, "STATE.md"),
+      "## Current Focus\n- **Task:** t\n## Session Handoff\n- **Pick up by:** wire the deploy script\n",
+    );
+    const out = runSessionHook(JSON.stringify({ invocationNum: 1 }), "antigravity", dir);
+    const text = JSON.parse(out).injectSteps[0].ephemeralMessage as string;
+    expect(text.split("\n")[0]).toBe("➡ PICK UP: wire the deploy script");
+  });
+
   it("antigravity non-session-start (invocationNum:2) → empty {}", () => {
     expect(runSessionHook(JSON.stringify({ invocationNum: 2 }), "antigravity", dir)).toBe("{}");
   });

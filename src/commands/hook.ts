@@ -5,7 +5,12 @@ import type { Readable } from "node:stream";
 
 /** Plain-text Mission Control for injection (no ANSI — agents ingest raw text). */
 function renderPlain(d: MissionControlData): string {
-  const lines = ["cognitiveOS — where you left off", ""];
+  const lines: string[] = [];
+  // Lead with the pick-up action — the first thing an ADHD user needs on resume.
+  if (d.pickUp) {
+    lines.push(`➡ PICK UP: ${d.pickUp}${d.pickUpReason ? ` (stopped: ${d.pickUpReason})` : ""}`, "");
+  }
+  lines.push("cognitiveOS — where you left off", "");
   if (d.focus?.task) lines.push(`Focus: ${d.focus.task}`);
   if (d.focus?.project) lines.push(`Project: ${d.focus.project}`);
   if (d.lastSession) lines.push(`Last session: ${d.lastSession}`);
