@@ -64,6 +64,13 @@ describe("generateSkillFiles", () => {
       expect(readFileSync(join(dir, f), "utf8")).toContain("## How To Work Here");
     }
   });
+
+  it("includes the canonical claude-map sections (folder tree + what to avoid)", () => {
+    generateSkillFiles(dir, base({ agents: "claude-code" }));
+    const md = readFileSync(join(dir, "CLAUDE.md"), "utf8");
+    expect(md).toContain("## Folder Structure");
+    expect(md).toContain("## What to Avoid");
+  });
 });
 
 describe("generateHooks", () => {

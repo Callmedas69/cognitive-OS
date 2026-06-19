@@ -37,6 +37,16 @@ current focus, blockers, open loops, session handoff, active projects.
 
 Full session workflow: the **cognitiveos** skill (auto-loaded by your agent).
 
+## Folder Structure
+
+\`\`\`
+./
+├── CLAUDE.md / AGENTS.md   ← this map (identical twins)
+├── STATE.md                ← current state — read first
+├── brain-dump/  queue/  focus/  projects/  ideas/  someday/   ← zones (each has CONTEXT.md)
+└── sessions/               ← append-only history
+\`\`\`
+
 ## Zone Map
 Each folder has a CONTEXT.md. Read it before acting in that zone.
 
@@ -59,6 +69,13 @@ ${blockchainBlock}
 - current-task.md holds ONE task only — enforce this, always
 - Session start: read STATE.md, show current focus + open loops
 - Session end: update STATE.md + append to sessions/YYYY-MM-DD.md
+
+## What to Avoid
+- Don't put more than one task in focus/current-task.md.
+- Don't edit sessions/ logs — append-only.
+- Don't skip reading STATE.md first.
+- Don't restructure STATE.md's sections — \`cognitiveos check\` depends on the 7.
+- Don't let CLAUDE.md and AGENTS.md drift — run \`cognitiveos check --fix\`.
 
 ${LOOP_BLOCK}
 `;
