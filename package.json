@@ -1,6 +1,6 @@
 {
   "name": "cognitiveos",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "An AI-powered ICM filesystem scaffold for developers with ADHD. Never lose context between sessions.",
   "type": "module",
   "bin": {
