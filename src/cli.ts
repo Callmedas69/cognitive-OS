@@ -5,6 +5,7 @@ import { startCommand } from "./commands/start.js";
 import { readStdinThenHook } from "./commands/hook.js";
 import { dumpCommand } from "./commands/dump.js";
 import { checkCommand } from "./commands/check.js";
+import { installSkillCommand, type InstallAgent } from "./commands/install-skill.js";
 import type { HookAgent } from "./types.js";
 import pkg from "../package.json" with { type: "json" };
 
@@ -52,6 +53,18 @@ program
   .option("--fix", "auto-repair detected issues (never touches STATE.md/user content)")
   .action((opts: { fix?: boolean }): void => {
     checkCommand(process.cwd(), opts.fix ?? false);
+  });
+
+program
+  .command("install-skill")
+  .description("Install the distributable /cognitiveos skill into your home agent-skill dir.")
+  .option("--agent <name>", "target agent: claude | codex | antigravity | all", "claude")
+  .action((opts: { agent?: string }): void => {
+    const valid: InstallAgent[] = ["claude", "codex", "antigravity", "all"];
+    const agent = valid.includes(opts.agent as InstallAgent)
+      ? (opts.agent as InstallAgent)
+      : "claude";
+    installSkillCommand(agent);
   });
 
 try {
