@@ -62,7 +62,7 @@ Loop does one task, runs its tests, commits on green, continues. Everything outs
 | ⛔ | **T-019** | Init wizard timed `< 60s` — human runs + judges |
 | ⛔ | **T-027 / T-028** | THE TEST — open Claude Code on Windows **and** Mac, verify unprompted context, capture screenshot |
 | ⛔ | **T-029** | Skill-file standalone verify — if it fails, **STOP** and revise the template |
-| ⛔ | **T-034** | 10 real devs ran `init` — no Week 2 until clear, no exceptions |
+| ⏸️ | **T-034** | ~~10 real devs ran `init` — no Week 2 until clear~~ — **DEFERRED by owner 2026-06-24.** Week 2 proceeds; re-instate as a launch-readiness check before T-046 (drop beta tag). |
 
 On any stop-line: commit work so far, write state to vault `CONTEXT.md`, halt, surface to Harry. A build loop never creates unattended past a stop-line.
 
@@ -129,5 +129,5 @@ MCP server, Next.js dashboard, database/network/telemetry, monetization code, Co
 - One module per session. Finish it or leave a note in STATE.md. Never two in parallel.
 - Stuck >30 min → write the blocker, switch to the smallest next task.
 - Ship ugly, working code over beautiful, unfinished code.
-- Hard gate ⛔ before week 2: 10 real ADHD devs must have run `init`. Do not write week 2 code until the gate clears.
+- ~~Hard gate ⛔ before week 2: 10 real ADHD devs must have run `init`.~~ **Deferred by owner 2026-06-24** — Week 2 hardening proceeds; the 10-user check moves to launch-readiness (before dropping the beta tag, T-046).
 - The one test that matters most: fresh machine, fresh Claude Code, run `init`, open Claude Code, verify it knows the project context **without being told**. If this fails, nothing else matters.

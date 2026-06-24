@@ -67,4 +67,17 @@ describe("readStdinThenHook", () => {
     const out = await readStdinThenHook(stream, "antigravity", dir);
     expect(JSON.parse(out).injectSteps).toBeTruthy();
   });
+
+  it("stream error → resolves '{}', never rejects", async () => {
+    const { Readable } = await import("node:stream");
+    // A stream that yields one (incomplete) chunk, then errors mid-read.
+    const stream = new Readable({
+      read() {
+        this.push("{");
+        this.destroy(new Error("ECONNRESET"));
+      },
+    });
+    const out = await readStdinThenHook(stream, "claude", dir);
+    expect(out).toBe("{}");
+  });
 });

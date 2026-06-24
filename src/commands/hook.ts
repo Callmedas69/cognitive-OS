@@ -67,6 +67,11 @@ export async function readStdinThenHook(
 ): Promise<string> {
   let raw = "";
   stream.setEncoding?.("utf8");
-  for await (const chunk of stream) raw += chunk;
+  try {
+    for await (const chunk of stream) raw += chunk;
+  } catch {
+    // stream error (ECONNRESET, EPIPE on a closed stdin) — fall through with
+    // whatever we accumulated; runSessionHook tolerates empty/garbage input.
+  }
   return runSessionHook(raw, agent, targetDir);
 }
