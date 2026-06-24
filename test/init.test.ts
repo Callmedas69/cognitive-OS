@@ -92,4 +92,10 @@ describe("initCommand — wires the session hook", () => {
     expect(existsSync(cfg)).toBe(true);
     expect(readFileSync(cfg, "utf8")).toContain("cognitiveos start --hook");
   });
+
+  // T-039 non-TTY guard — manual verification (TTY mocking is brittle in vitest):
+  //   echo "" | node dist/cli.js init
+  // Expect: clean message "requires an interactive terminal (TTY)", exit 1, no
+  // ERR_USE_AFTER_CLOSE stack trace. The guard is skipped here because tests
+  // inject a prompt fn (the non-TTY path the guard targets is the real wizard only).
 });

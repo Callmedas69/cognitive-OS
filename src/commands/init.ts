@@ -177,6 +177,18 @@ export async function initCommand(
   cwd: string = process.cwd(),
   prompt?: PromptFn
 ): Promise<void> {
+  // The wizard needs an interactive terminal. Piped/CI stdin makes @clack/prompts
+  // read a closed stream and crash with ERR_USE_AFTER_CLOSE. Fail clean instead.
+  // (Skip the guard when a prompt fn is injected — that's the test path, no TTY needed.)
+  if (prompt === undefined && !process.stdin.isTTY) {
+    console.error(
+      "cognitiveos init requires an interactive terminal (TTY).\n" +
+        "Run it directly in a shell, not piped or in CI."
+    );
+    process.exitCode = 1;
+    return;
+  }
+
   console.log("\n" + renderWordmark() + "\n");
   intro(brandLine());
 
