@@ -98,6 +98,20 @@ describe("wireSessionHooks", () => {
     expect(cfg.hooks.SessionStart.length).toBe(1);
   });
 
+  it("marker in an unrelated field is not mistaken for a wired hook", () => {
+    // The MARKER string appears in a comment-like field, but no real SessionStart
+    // entry is wired. The anchored check must still wire the hook (no false positive).
+    mkdirSync(join(dir, ".claude"), { recursive: true });
+    writeFileSync(
+      CLAUDE_CFG(),
+      JSON.stringify({ description: "remember to run cognitiveos start --hook docs", hooks: { SessionStart: [] } }),
+    );
+    wireSessionHooks(dir, ans({ agents: "claude-code" }));
+    const cfg = JSON.parse(readFileSync(CLAUDE_CFG(), "utf8"));
+    expect(cfg.hooks.SessionStart.length).toBe(1);
+    expect(cfg.hooks.SessionStart[0].hooks[0].command).toContain(MARKER);
+  });
+
   it("malformed existing config → not written, reported as manual", () => {
     mkdirSync(join(dir, ".claude"), { recursive: true });
     writeFileSync(CLAUDE_CFG(), "{ broken");

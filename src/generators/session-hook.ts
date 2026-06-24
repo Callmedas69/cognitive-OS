@@ -20,9 +20,22 @@ function wantsAntigravity(a: AgentChoice): boolean {
   return a === "antigravity" || a === "all";
 }
 
-/** A nested command entry already wired? (idempotency) */
-function alreadyWired(obj: unknown): boolean {
-  return JSON.stringify(obj ?? {}).includes(MARKER);
+/** True if any entry in a hook array carries our marker command. */
+function entriesContainMarker(value: unknown): boolean {
+  if (!Array.isArray(value)) return false;
+  return value.some((e) => JSON.stringify(e ?? {}).includes(MARKER));
+}
+
+/** Claude idempotency: only scan the real SessionStart entries, not the whole config. */
+function alreadyWiredClaude(data: JsonObject): boolean {
+  return entriesContainMarker((data.hooks as JsonObject | undefined)?.SessionStart);
+}
+
+/** Antigravity idempotency: only scan our named hook's PreInvocation entries. */
+function alreadyWiredAntigravity(data: JsonObject): boolean {
+  return entriesContainMarker(
+    (data["cognitiveos-session"] as JsonObject | undefined)?.PreInvocation,
+  );
 }
 
 function asArray(v: unknown): unknown[] {
@@ -50,7 +63,7 @@ function wireClaude(targetDir: string, res: SessionHookResult): void {
     return;
   }
   const data = loaded.data;
-  if (alreadyWired(data)) {
+  if (alreadyWiredClaude(data)) {
     // already present — nothing written this run (keeps --fix honest)
     return;
   }
@@ -82,7 +95,7 @@ function wireAntigravity(targetDir: string, res: SessionHookResult): void {
     return;
   }
   const data = loaded.data;
-  if (alreadyWired(data)) {
+  if (alreadyWiredAntigravity(data)) {
     // already present — nothing written this run (keeps --fix honest)
     return;
   }
