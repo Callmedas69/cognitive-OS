@@ -68,7 +68,14 @@ function wireClaude(targetDir: string, res: SessionHookResult): void {
     return;
   }
   const hooks = (data.hooks as JsonObject) ?? {};
-  hooks.SessionStart = [...asArray(hooks.SessionStart), entry];
+  const existing = hooks.SessionStart;
+  if (existing !== undefined && !Array.isArray(existing)) {
+    // User put a non-array under SessionStart — appending would silently drop it.
+    // Leave the file untouched and report so the user wires it by hand.
+    res.manual.push({ file: rel, snippet });
+    return;
+  }
+  hooks.SessionStart = [...asArray(existing), entry];
   data.hooks = hooks;
   backupAndWrite(path, data);
   res.wired.push(rel);

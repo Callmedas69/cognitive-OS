@@ -112,6 +112,15 @@ describe("wireSessionHooks", () => {
     expect(cfg.hooks.SessionStart[0].hooks[0].command).toContain(MARKER);
   });
 
+  it("non-array SessionStart → reported as manual, file untouched (no silent drop)", () => {
+    mkdirSync(join(dir, ".claude"), { recursive: true });
+    const original = JSON.stringify({ hooks: { SessionStart: { type: "command", command: "other" } } });
+    writeFileSync(CLAUDE_CFG(), original);
+    const res = wireSessionHooks(dir, ans({ agents: "claude-code" }));
+    expect(res.manual.some((m) => m.file.includes(".claude/settings.json"))).toBe(true);
+    expect(readFileSync(CLAUDE_CFG(), "utf8")).toBe(original);
+  });
+
   it("malformed existing config → not written, reported as manual", () => {
     mkdirSync(join(dir, ".claude"), { recursive: true });
     writeFileSync(CLAUDE_CFG(), "{ broken");
