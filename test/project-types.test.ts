@@ -23,6 +23,17 @@ describe("project-type templates (PRD 5.2)", () => {
     }
   });
 
+  it("blockchain stages carry stage-specific guidance (T-041)", () => {
+    const byPath = Object.fromEntries(
+      PROJECT_TEMPLATES.blockchain.folders.map((f) => [f.path, f.context]),
+    );
+    expect(byPath.research).toContain("risk-register");
+    expect(byPath.contracts).toContain("OpenZeppelin");
+    expect(byPath.frontend).toContain("wagmi");
+    expect(byPath.deploy).toContain("deployments.md");
+    expect(byPath.audit).toContain("audit-findings.md");
+  });
+
   it("non-blockchain types are minimal (no prescribed stages)", () => {
     for (const t of ["fullstack", "cli-tool", "content", "mixed"] as const) {
       expect(PROJECT_TEMPLATES[t].folders.length).toBe(0);
