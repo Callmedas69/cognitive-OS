@@ -1,3 +1,5 @@
+import { SETUP_SENTINEL } from "./first-run-block.js";
+
 export interface StateVars {
   projectName: string;
 }
@@ -13,6 +15,8 @@ export function renderState({ projectName }: StateVars): string {
   return `# STATE.md — Current State
 
 > A snapshot, not a log. Overwritten each session. History lives in sessions/.
+
+${SETUP_SENTINEL}
 
 ## Current Focus
 - **Project:** ${projectName}

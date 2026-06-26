@@ -8,6 +8,7 @@ import { generateSkillFiles } from "../generators/skill-files.js";
 import { generateAgentSkill } from "../generators/agent-skill.js";
 import { wireSessionHooks } from "../generators/session-hook.js";
 import { generateHooks } from "../generators/hooks.js";
+import { generateKeeperAgent } from "../generators/keeper-agent.js";
 import { generateProjectTemplate } from "../generators/project-template.js";
 import { generateFirstSession } from "../generators/session.js";
 import { installSkill, type InstallAgent } from "./install-skill.js";
@@ -208,7 +209,10 @@ export function generateAll(
   generateState(stageDir, answers);
   generateSkillFiles(stageDir, answers);
   generateAgentSkill(stageDir, answers);
-  if (wantsClaudeHooks(answers.agents)) generateHooks(stageDir);
+  if (wantsClaudeHooks(answers.agents)) {
+    generateHooks(stageDir);
+    generateKeeperAgent(stageDir, answers);
+  }
   generateProjectTemplate(stageDir, answers);
   generateFirstSession(stageDir, now);
 }

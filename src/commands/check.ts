@@ -5,12 +5,15 @@ import { safeWrite } from "../lib/fs-utils.js";
 import { ZONE_CONTEXTS } from "../templates/contexts/index.js";
 import { wireSessionHooks } from "../generators/session-hook.js";
 import { LOOP_MARKER } from "../templates/loop-block.js";
+import { SETUP_SENTINEL } from "../templates/first-run-block.js";
 import type { AgentChoice } from "../types.js";
 
 export interface CheckResult {
   label: string;
   ok: boolean;
   detail: string;
+  /** Soft advisory (⚠): true but worth surfacing. Never counts as a failure. */
+  warn?: boolean;
 }
 
 const ZONES = ["brain-dump", "queue", "focus", "projects", "ideas", "someday"];
@@ -49,6 +52,22 @@ export function runChecks(targetDir: string): CheckResult[] {
       label: "STATE.md",
       ok: sectionsOk, // size is a soft flag, never a hard failure
       detail: sectionsOk ? `ok${sizeNote}` : `${sections}/${STATE_SECTIONS} sections${sizeNote}`,
+    });
+  }
+
+  // 1b. project context setup — soft ⚠ while STATE.md still carries the
+  // first-run sentinel (context is the scaffold, not filled in yet). Never a
+  // failure: it needs the user's answers, not `--fix`.
+  const stateForSetup = readIfExists(memPath);
+  if (stateForSetup !== null) {
+    const needsSetup = stateForSetup.includes(SETUP_SENTINEL);
+    results.push({
+      label: "setup",
+      ok: true,
+      warn: needsSetup,
+      detail: needsSetup
+        ? "context not set up — your agent will offer setup (or set it up anytime)"
+        : "done",
     });
   }
 
@@ -177,7 +196,8 @@ function sessionsWritable(dir: string): { ok: boolean; detail: string } {
 export function renderCheckReport(results: CheckResult[]): string {
   const lines = ["cognitiveOS health check"];
   for (const r of results) {
-    lines.push(`${r.ok ? "✓" : "✗"} ${r.label.padEnd(18)} ${r.detail}`);
+    const symbol = r.ok ? (r.warn ? "⚠" : "✓") : "✗";
+    lines.push(`${symbol} ${r.label.padEnd(18)} ${r.detail}`);
   }
   const issues = results.filter((r) => !r.ok).length;
   lines.push("");

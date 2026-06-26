@@ -1,4 +1,5 @@
 import { LOOP_BLOCK } from "./loop-block.js";
+import { FIRST_RUN_BLOCK } from "./first-run-block.js";
 
 /**
  * The DISTRIBUTABLE cognitiveOS skill — a project-agnostic operating manual a
@@ -128,6 +129,8 @@ to the user, in this order:
 Do not ask questions. Just show the state. \`start\` never prompts or resets, no
 matter how long the absence: gone a day or gone two weeks, it picks up exactly
 where the user left off.
+
+${FIRST_RUN_BLOCK}
 
 ${LOOP_BLOCK}
 

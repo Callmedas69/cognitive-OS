@@ -1,4 +1,5 @@
 import { LOOP_BLOCK } from "./loop-block.js";
+import { FIRST_RUN_BLOCK } from "./first-run-block.js";
 
 export interface SkillVars {
   projectName: string;
@@ -27,6 +28,8 @@ focus, open loops (max 3), blockers, and last session date. Do not ask
 questions — just show the state.
 
 Active project: **${projectName}** (\`projects/${projectName}/\`).
+
+${FIRST_RUN_BLOCK}
 
 ## Zone map — route every task
 
