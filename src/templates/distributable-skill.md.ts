@@ -9,20 +9,54 @@ import { LOOP_BLOCK } from "./loop-block.js";
  * everywhere (the `check` marker depends on that exact heading).
  */
 
-const DESCRIPTION =
-  "ICM (Interpreted Context Methodology) workflow for a cognitiveOS project. " +
-  "Use at the start of any work session to load STATE.md and show where you left off, " +
-  "and whenever the user is lost or resuming (\"where did I leave off\", \"what was I doing\", " +
-  "\"catch me up\", \"I'm lost\", \"what's next\", \"I forgot what I was working on\"). " +
-  "Also use to capture a stray thought without losing focus, to route a task to the right zone " +
-  "(brain-dump, queue, focus, projects, ideas, someday), to enforce the one-task and ADHD response rules, " +
-  "and at session end to save state and append a session log. " +
-  "Bootstraps a new project via `cognitiveos init` when STATE.md is absent.";
+// Categorized trigger buckets (skill-creator eval-loop output) — higher recall
+// than flat prose. Rendered as a YAML block scalar so the agent's matcher sees
+// every phrase. Kept indent-free here; renderDistributableSkill() indents it.
+const DESCRIPTION = `ICM (Interpreted Context Methodology) workflow for a cognitiveOS project.
+
+Trigger this skill whenever ANY of the following apply:
+
+SESSION RESUME: user is returning to a project or picking up after a break:
+"where did I leave off", "catch me up", "what was I doing", "what's next",
+"whats next", "get me oriented", "I'm back", "opening claude", "fresh session",
+"I forgot what I was working on", "what should I do", "I'm lost",
+"I had a thing I was in the middle of", "can't remember what I was doing"
+
+ZONE ROUTING: user is unsure where something belongs:
+"which folder", "where should this go", "is this a queue thing", "which zone",
+"where do I put this", "should I log this", "brain-dump or idea"
+
+CAPTURE: user wants to note something mid-task without losing focus:
+"don't lose my place", "note that down", "remember this for later",
+"quick thought", "add this to the backlog"
+
+SESSION END: user is wrapping up:
+"done for tonight", "save where we are", "end session", "wrap up",
+"future me", "so I know where to pick up"
+
+ADHD FOCUS: user is overwhelmed or jumping between tasks:
+"jumping between", "losing track", "tell me the one thing", "what should I
+focus on", "I keep switching", "I can't decide", "I'm overwhelmed"
+
+Do NOT trigger for: pure coding questions, bug fixes, git commands, calendar
+lookups, system diagnostics, or any request that does not involve session
+state, task routing, or cognitiveOS zone management.
+
+Bootstraps a new project via \`cognitiveos init\` when STATE.md is absent.`;
+
+/** Indent each line 2 spaces for the YAML block scalar (blank lines stay empty). */
+function blockScalar(body: string): string {
+  return body
+    .split("\n")
+    .map((line) => (line.length > 0 ? `  ${line}` : ""))
+    .join("\n");
+}
 
 export function renderDistributableSkill(): string {
   return `---
 name: cognitiveos
-description: ${DESCRIPTION}
+description: |
+${blockScalar(DESCRIPTION)}
 allowed-tools: Bash(cognitiveos *) Bash(npx cognitiveos *)
 ---
 
