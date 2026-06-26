@@ -51,7 +51,15 @@ export function buildQuestions() {
       type: "list",
       name: "projectType",
       message: "[2/3] Project type?",
-      choices: ["blockchain", "fullstack", "cli-tool", "content", "mixed"],
+      // Four typed verticals scaffold real stage folders; `mixed` is the
+      // deliberate minimal catch-all, labelled so the choice stays honest.
+      choices: [
+        { name: "blockchain", value: "blockchain" },
+        { name: "fullstack", value: "fullstack" },
+        { name: "cli-tool", value: "cli-tool" },
+        { name: "content", value: "content" },
+        { name: "mixed (minimal, add your own structure)", value: "mixed" },
+      ],
     },
     {
       type: "input",
@@ -98,7 +106,10 @@ async function clackPrompt(_questions?: unknown): Promise<RawAnswers> {
 
   const projectType = await select({
     message: q[1].message,
-    options: (q[1].choices as string[]).map((s) => ({ value: s, label: s })),
+    options: (q[1].choices as { name: string; value: string }[]).map((c) => ({
+      value: c.value,
+      label: c.name,
+    })),
   });
   bailIfCancelled(projectType);
 

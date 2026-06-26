@@ -44,8 +44,8 @@ describe("runInit — fresh dir produces the complete structure", () => {
     }
   });
 
-  it("minimal project type → projects/<name>/ survives the atomic merge (regression)", () => {
-    runInit(dir, answers({ projectType: "fullstack", projectName: "web-app" }));
+  it("mixed (minimal) project type → projects/<name>/ survives the atomic merge (regression)", () => {
+    runInit(dir, answers({ projectType: "mixed", projectName: "web-app" }));
     expect(existsSync(join(dir, "projects", "web-app", "CONTEXT.md"))).toBe(true);
   });
 

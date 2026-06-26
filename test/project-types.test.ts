@@ -34,9 +34,31 @@ describe("project-type templates (PRD 5.2)", () => {
     expect(byPath.audit).toContain("audit-findings.md");
   });
 
-  it("non-blockchain types are minimal (no prescribed stages)", () => {
-    for (const t of ["fullstack", "cli-tool", "content", "mixed"] as const) {
-      expect(PROJECT_TEMPLATES[t].folders.length).toBe(0);
+  it("typed verticals each render their stage map, every stage with a CONTEXT.md", () => {
+    const expected = {
+      fullstack: ["design", "api", "frontend", "infra"],
+      "cli-tool": ["spec", "core", "cli", "docs"],
+      content: ["research", "drafts", "review", "published"],
+    } as const;
+    for (const [type, stages] of Object.entries(expected)) {
+      const { folders } = PROJECT_TEMPLATES[type as keyof typeof expected];
+      expect(folders.map((f) => f.path), type).toEqual([...stages]);
+      for (const f of folders) {
+        expect(f.context, `${type}/${f.path}`).toContain("## Role");
+        expect(f.context.trimEnd().split("\n").length).toBeLessThan(30);
+      }
     }
+  });
+
+  it("typed verticals carry stage-specific guidance", () => {
+    const ctx = (t: "fullstack" | "cli-tool" | "content", p: string) =>
+      PROJECT_TEMPLATES[t].folders.find((f) => f.path === p)!.context;
+    expect(ctx("fullstack", "api")).toContain("schema");
+    expect(ctx("cli-tool", "spec")).toContain("exit codes");
+    expect(ctx("content", "review")).toContain("fact-check");
+  });
+
+  it("mixed stays minimal (deliberate catch-all, no prescribed stages)", () => {
+    expect(PROJECT_TEMPLATES.mixed.folders.length).toBe(0);
   });
 });

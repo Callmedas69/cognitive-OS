@@ -1,35 +1,5 @@
 import type { ProjectTemplate } from "../../types.js";
-
-// One CONTEXT.md per stage — role per PRD 5.2. `extra` carries stage-specific
-// rules, appended after the shared rules. `output`/`handoff` override the generic
-// lines so each stage gives concrete guidance instead of boilerplate.
-function stageContext(
-  folder: string,
-  role: string,
-  extra: string,
-  output: string,
-  handoff: string,
-): string {
-  return `# ${folder} — CONTEXT
-
-## Role
-${role}
-
-## Input
-Files in this stage folder + the project's STATE.md focus.
-
-## Rules
-- Stay in this stage's job. Hand off, don't sprawl.
-- Max 3 action items, max 1 question per response.
-${extra}
-
-## Output
-${output}
-
-## Handoff
-${handoff}
-`;
-}
+import { stageContext } from "./stage-context.js";
 
 // Blockchain vertical (MVP) — research → contracts → frontend → deploy → audit (PRD 5.2).
 export const blockchainTemplate: ProjectTemplate = {

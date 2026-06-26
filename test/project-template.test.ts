@@ -30,8 +30,17 @@ describe("generateProjectTemplate", () => {
     }
   });
 
-  it("minimal type → project root with a CONTEXT.md (folder survives merge), no stages", () => {
+  it("fullstack → root CONTEXT.md + 4 stage subfolders, each with CONTEXT.md", () => {
     generateProjectTemplate(dir, base({ projectType: "fullstack" }));
+    const root = join(dir, "projects", "my-dapp");
+    expect(existsSync(join(root, "CONTEXT.md"))).toBe(true);
+    for (const stage of ["design", "api", "frontend", "infra"]) {
+      expect(existsSync(join(root, stage, "CONTEXT.md")), stage).toBe(true);
+    }
+  });
+
+  it("mixed (minimal) → project root with a CONTEXT.md (folder survives merge), no stages", () => {
+    generateProjectTemplate(dir, base({ projectType: "mixed" }));
     const root = join(dir, "projects", "my-dapp");
     expect(readdirSync(root)).toEqual(["CONTEXT.md"]);
   });

@@ -1,13 +1,17 @@
 import type { ProjectTemplate, ProjectType } from "../../types.js";
 import { blockchainTemplate } from "./blockchain.js";
+import { fullstackTemplate } from "./fullstack.js";
+import { cliToolTemplate } from "./cli-tool.js";
+import { contentTemplate } from "./content.js";
 import { minimalTemplate } from "./minimal.js";
 
 // Project-type → folder template (PRD 5.2 / 7.4 Q2).
-// Blockchain is the MVP vertical with a full 5-stage map; the rest are minimal.
+// Each vertical ships a stage map; `mixed` stays minimal as the deliberate
+// "doesn't fit a category" catch-all (user adds structure as it grows).
 export const PROJECT_TEMPLATES: Record<ProjectType, ProjectTemplate> = {
   blockchain: blockchainTemplate,
-  fullstack: minimalTemplate,
-  "cli-tool": minimalTemplate,
-  content: minimalTemplate,
+  fullstack: fullstackTemplate,
+  "cli-tool": cliToolTemplate,
+  content: contentTemplate,
   mixed: minimalTemplate,
 };
