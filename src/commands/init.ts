@@ -10,6 +10,7 @@ import { wireSessionHooks } from "../generators/session-hook.js";
 import { generateHooks } from "../generators/hooks.js";
 import { generateProjectTemplate } from "../generators/project-template.js";
 import { generateFirstSession } from "../generators/session.js";
+import { installSkill, type InstallAgent } from "./install-skill.js";
 import { renderWordmark, brandLine, emerald, coral, muted } from "../lib/theme.js";
 
 // Minimal prompt signature — lets tests inject a fake without a TTY.
@@ -139,6 +140,61 @@ function wantsClaudeHooks(agents: AgentChoice): boolean {
 }
 
 /**
+ * Map the wizard's AgentChoice to the global skill installer's InstallAgent.
+ * Cursor has no SKILL.md home target (it uses the project .mdc rule), so it
+ * returns null — the caller skips the global-skill offer for cursor.
+ */
+export function toInstallAgent(agents: AgentChoice): InstallAgent | null {
+  switch (agents) {
+    case "claude-code":
+      return "claude";
+    case "codex":
+      return "codex";
+    case "antigravity":
+      return "antigravity";
+    case "all":
+      return "all"; // claude + codex + antigravity (cursor has no global target)
+    case "cursor":
+      return null;
+  }
+}
+
+/**
+ * Offer to install the global /cognitiveos skill after init, then install on yes.
+ * Reuses installSkill (backup + idempotent). confirmFn and homeDir are injectable
+ * so tests drive it without a TTY or touching the real home dir.
+ */
+export async function offerSkillInstall(
+  agents: AgentChoice,
+  confirmFn: () => Promise<boolean>,
+  homeDir?: string,
+): Promise<void> {
+  const installAgent = toInstallAgent(agents);
+  if (installAgent === null) {
+    note(
+      "Cursor uses the project rule (.cursor/rules/cognitiveos.mdc) — no global skill needed.",
+      "skill",
+    );
+    return;
+  }
+
+  const yes = await confirmFn();
+  if (!yes) {
+    note("Skipped. Run `cognitiveos install-skill` anytime to add it.", "skill");
+    return;
+  }
+
+  const res = installSkill(installAgent, homeDir);
+  for (const b of res.backedUp) log.warn(coral(`Backed up existing skill → ${b}`));
+  if (res.written.length > 0) {
+    log.success(`Installed /cognitiveos skill: ${res.written.join(", ")}`);
+    note("Restart your agent, then type /cognitiveos.", "skill");
+  } else {
+    log.info("cognitiveOS skill already up to date.");
+  }
+}
+
+/**
  * Write the full cognitiveOS structure into a directory, in TDD 4.1 order:
  * zones → state → skill files → agent skill → hooks (Claude/All) → project template.
  * Pure generation — callers wrap this in atomicGenerate for atomicity.
@@ -248,6 +304,18 @@ export async function initCommand(
   for (const m of hooks.manual) {
     log.warn(coral(`Could not edit ${m.file} (unreadable JSON). Add this hook manually:`));
     note(m.snippet, "hook snippet");
+  }
+
+  // Offer the global /cognitiveos skill so adoption is one flow (PRD onboarding).
+  // Interactive path only: skip under test (injected prompt) and non-TTY so we
+  // never prompt-hang or write to a real home dir unattended.
+  if (prompt === undefined && process.stdin.isTTY) {
+    await offerSkillInstall(answers.agents, () =>
+      confirm({
+        message: "Install the global /cognitiveos skill too?",
+        initialValue: true,
+      }).then((v) => v === true),
+    );
   }
 
   outro(renderSummary(cwd));
