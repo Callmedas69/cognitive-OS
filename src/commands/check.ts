@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, writeFileSync, rmSync, renameSync } from "node:fs";
 import { join } from "node:path";
 import { parseStateContent } from "../lib/parser.js";
+import { inboxStats } from "../lib/inbox.js";
 import { safeWrite } from "../lib/fs-utils.js";
 import { ZONE_CONTEXTS } from "../templates/contexts/index.js";
 import { wireSessionHooks } from "../generators/session-hook.js";
@@ -23,13 +24,20 @@ const STATE_SECTIONS = 7;
 // Soft growth flag: STATE.md is a snapshot, not a log. Past this it's drifting
 // back into an append-log — warn, but don't fail (nothing is broken).
 const STATE_SIZE_WARN_LINES = 150;
+// Soft inbox-rot flags: capture without triage becomes a guilt pile. Warn when
+// the pile is big or the oldest item has sat a week — never a failure, and
+// --fix never touches it (user content).
+const INBOX_WARN_COUNT = 10;
+const INBOX_WARN_DAYS = 7;
+// The skill rule says max 3 active projects; surface a soft ⚠ when exceeded.
+const MAX_ACTIVE_PROJECTS = 3;
 
 function readIfExists(p: string): string | null {
   return existsSync(p) ? readFileSync(p, "utf8") : null;
 }
 
 /** Run all health checks against a project dir (TDD 4.4). Pure — no console, no exit. */
-export function runChecks(targetDir: string): CheckResult[] {
+export function runChecks(targetDir: string, now: Date = new Date()): CheckResult[] {
   const results: CheckResult[] = [];
   const claude = readIfExists(join(targetDir, "CLAUDE.md"));
   const agents = readIfExists(join(targetDir, "AGENTS.md"));
@@ -70,6 +78,42 @@ export function runChecks(targetDir: string): CheckResult[] {
         : "done",
     });
   }
+
+  // 1c. active-projects cap — the skill rule says max 3; more = the sprawl the
+  // rule exists to prevent. Soft ⚠ only: nothing is broken, --fix never prunes.
+  if (stateForSetup !== null) {
+    const active = parseStateContent(stateForSetup).memory.activeProjects ?? [];
+    const over = active.length > MAX_ACTIVE_PROJECTS;
+    results.push({
+      label: "projects",
+      ok: true,
+      warn: over,
+      detail: over
+        ? `${active.length} active — max ${MAX_ACTIVE_PROJECTS} (park extras in someday/)`
+        : `${active.length} active (ok)`,
+    });
+  }
+
+  // 1d. inbox rot — dump captures forever; surface the pile before it becomes
+  // a guilt pile. Soft ⚠ only: triage needs the user, not --fix.
+  const inbox = inboxStats(targetDir, now);
+  const rotting =
+    inbox.count >= INBOX_WARN_COUNT || (inbox.oldestDays ?? 0) >= INBOX_WARN_DAYS;
+  const oldestNote =
+    inbox.oldestDays !== undefined && inbox.oldestDays > 0
+      ? ` (oldest ${inbox.oldestDays} day${inbox.oldestDays === 1 ? "" : "s"})`
+      : "";
+  results.push({
+    label: "inbox",
+    ok: true,
+    warn: inbox.count > 0 && rotting,
+    detail:
+      inbox.count === 0
+        ? "empty"
+        : rotting
+          ? `${inbox.count} item${inbox.count === 1 ? "" : "s"} waiting triage${oldestNote}`
+          : `ok (${inbox.count} item${inbox.count === 1 ? "" : "s"})`,
+  });
 
   // 2 + 3. skill files contain the zone routing table (when present)
   for (const [label, content] of [

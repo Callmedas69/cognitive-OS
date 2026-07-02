@@ -1,6 +1,7 @@
-import { existsSync, readdirSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { parseState } from "../lib/parser.js";
+import { inboxStats } from "../lib/inbox.js";
 import { renderMissionControl, type MissionControlData } from "../lib/output.js";
 
 const SESSION_FILE = /^(\d{4}-\d{2}-\d{2})\.md$/;
@@ -39,6 +40,19 @@ export function findLastSessionDate(targetDir: string): string | undefined {
   return dates.at(-1);
 }
 
+/**
+ * The actual task text from focus/current-task.md, or undefined. Reads the
+ * `**Task:** value` line (the format the skill + check enforce); the scaffold
+ * placeholder file has no such line, so it naturally reads as "no task".
+ */
+export function readCurrentTask(targetDir: string): string | undefined {
+  const path = join(targetDir, "focus", "current-task.md");
+  if (!existsSync(path)) return undefined;
+  const m = /\*\*Task:\*\*\s*(.*)/.exec(readFileSync(path, "utf8"));
+  const v = m?.[1].trim();
+  return v && v !== "—" ? v : undefined;
+}
+
 /** Gather Mission Control data from a project dir. Returns null if not initialized. */
 export function buildMissionControl(
   targetDir: string,
@@ -54,15 +68,20 @@ export function buildMissionControl(
   const clean = (s?: string): string | undefined => (s && s.trim() !== "—" ? s.trim() : undefined);
   const handoff = memory.sessionHandoff;
 
+  // NEXT is the actual task, not a pointer to a file — one less hop at the
+  // moment of task initiation (the moment ADHD loses).
+  const task = readCurrentTask(targetDir);
+
   return {
     focus: memory.currentFocus,
     lastSession: lastDate ? relativeSession(parseSessionDate(lastDate), now) : undefined,
     loops: memory.openLoops ?? [],
     blocker: memory.blockers?.[0],
-    next: "Open focus/current-task.md",
+    next: task ?? "No task set — pull the top item from queue/",
     recent: memory.recentlyCompleted?.[0],
     pickUp: clean(handoff?.pickUpBy),
     pickUpReason: clean(handoff?.stoppedBecause),
+    inbox: inboxStats(targetDir, now),
   };
 }
 

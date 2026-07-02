@@ -73,6 +73,68 @@ describe("runChecks — each failure mode detected individually", () => {
   });
 });
 
+describe("inbox soft warn (never fails)", () => {
+  const NOW = new Date(2026, 5, 20, 9, 0); // init fixture writes sessions on 2026-06-13
+
+  it("empty inbox → ok, no warn", () => {
+    const r = runChecks(dir, NOW).find((x) => x.label === "inbox")!;
+    expect(r.ok).toBe(true);
+    expect(r.warn).toBeFalsy();
+    expect(r.detail).toBe("empty");
+  });
+
+  it("a few fresh items → ok, no warn", () => {
+    writeFileSync(
+      join(dir, "brain-dump", "inbox.md"),
+      "- [2026-06-20 08:00] a\n- [2026-06-20 08:01] b\n",
+    );
+    const r = runChecks(dir, NOW).find((x) => x.label === "inbox")!;
+    expect(r.warn).toBeFalsy();
+    expect(r.detail).toBe("ok (2 items)");
+  });
+
+  it("10+ items → soft ⚠, report still passes", () => {
+    const lines = Array.from({ length: 10 }, (_, i) => `- [2026-06-20 08:0${i % 10}] item ${i}`);
+    writeFileSync(join(dir, "brain-dump", "inbox.md"), lines.join("\n") + "\n");
+    const r = runChecks(dir, NOW).find((x) => x.label === "inbox")!;
+    expect(r.ok).toBe(true);
+    expect(r.warn).toBe(true);
+    expect(r.detail).toContain("10 items waiting triage");
+    expect(renderCheckReport(runChecks(dir, NOW))).toContain("All checks passed.");
+  });
+
+  it("one item sitting 7+ days → soft ⚠", () => {
+    writeFileSync(join(dir, "brain-dump", "inbox.md"), "- [2026-06-13 10:00] rotting\n");
+    const r = runChecks(dir, NOW).find((x) => x.label === "inbox")!;
+    expect(r.ok).toBe(true);
+    expect(r.warn).toBe(true);
+    expect(r.detail).toContain("oldest 7 days");
+  });
+});
+
+describe("active-projects soft warn (never fails)", () => {
+  it("fresh init (1 project) → ok, no warn", () => {
+    const r = find("projects");
+    expect(r.ok).toBe(true);
+    expect(r.warn).toBeFalsy();
+    expect(r.detail).toBe("1 active (ok)");
+  });
+
+  it("4 active projects → soft ⚠, report still passes", () => {
+    const statePath = join(dir, "STATE.md");
+    const state = readFileSync(statePath, "utf8").replace(
+      "## Active Projects\n- p",
+      "## Active Projects\n- p\n- q\n- r\n- s",
+    );
+    writeFileSync(statePath, state);
+    const r = find("projects");
+    expect(r.ok).toBe(true);
+    expect(r.warn).toBe(true);
+    expect(r.detail).toContain("4 active — max 3");
+    expect(renderCheckReport(runChecks(dir))).toContain("All checks passed.");
+  });
+});
+
 describe("loop-block check", () => {
   it("passes when the loop block is present (default fixture)", () => {
     expect(find("loop-block").ok).toBe(true);

@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { renderMissionControl, type MissionControlData } from "../src/lib/output.js";
-import { buildMissionControl, findLastSessionDate } from "../src/commands/start.js";
+import { buildMissionControl, findLastSessionDate, readCurrentTask } from "../src/commands/start.js";
 import { runInit } from "../src/commands/init.js";
 
 const FIXED = new Date(2026, 5, 13, 9, 7);
@@ -46,6 +46,14 @@ describe("renderMissionControl", () => {
     expect(out).not.toContain("BLOCKED");
     expect(out).not.toContain("RECENT");
   });
+
+  it("shows INBOX with age only when captures are waiting", () => {
+    const waiting = renderMissionControl(sample({ inbox: { count: 5, oldestDays: 9 } }));
+    expect(waiting).toContain("INBOX");
+    expect(waiting).toContain("5 to triage (oldest 9 days)");
+    const empty = renderMissionControl(sample({ inbox: { count: 0 } }));
+    expect(empty).not.toContain("INBOX");
+  });
 });
 
 describe("buildMissionControl + findLastSessionDate (real memory.md)", () => {
@@ -68,5 +76,32 @@ describe("buildMissionControl + findLastSessionDate (real memory.md)", () => {
     expect(data.lastSession).toBe("today (Jun 13)");
     expect(findLastSessionDate(dir)).toBe("2026-06-13");
     expect(data.recent).toBe("cognitiveOS initialized");
+  });
+
+  it("NEXT is the real task from focus/current-task.md, not a file pointer", () => {
+    runInit(dir, { agents: "claude-code", projectType: "mixed", projectName: "p" }, FIXED);
+    writeFileSync(
+      join(dir, "focus", "current-task.md"),
+      "# Current Task\n\n**Task:** Wire the login form validation\n",
+    );
+    const data = buildMissionControl(dir, FIXED)!;
+    expect(data.next).toBe("Wire the login form validation");
+  });
+
+  it("scaffold placeholder task file → fallback NEXT copy", () => {
+    runInit(dir, { agents: "claude-code", projectType: "mixed", projectName: "p" }, FIXED);
+    expect(readCurrentTask(dir)).toBeUndefined();
+    const data = buildMissionControl(dir, FIXED)!;
+    expect(data.next).toBe("No task set — pull the top item from queue/");
+  });
+
+  it("surfaces inbox stats from brain-dump/inbox.md", () => {
+    runInit(dir, { agents: "claude-code", projectType: "mixed", projectName: "p" }, FIXED);
+    writeFileSync(
+      join(dir, "brain-dump", "inbox.md"),
+      "- [2026-06-10 08:00] waiting a\n- [2026-06-12 08:00] waiting b\n",
+    );
+    const data = buildMissionControl(dir, FIXED)!;
+    expect(data.inbox).toEqual({ count: 2, oldestDays: 3 });
   });
 });

@@ -10,6 +10,8 @@ export interface MissionControlData {
   pickUp?: string;
   /** Session Handoff "stopped because" — subtext under the pick-up line. */
   pickUpReason?: string;
+  /** brain-dump/inbox.md stats — INBOX line shown only when count > 0. */
+  inbox?: { count: number; oldestDays?: number };
 }
 
 const INNER = 56; // content width → total line 60 cols, well under 80
@@ -70,6 +72,16 @@ export function renderMissionControl(d: MissionControlData): string {
   // BLOCKED (only when present)
   if (d.blocker) {
     lines.push(field("BLOCKED", d.blocker));
+    lines.push(blank);
+  }
+
+  // INBOX (only when captures are waiting — neutral phrasing, no shame copy)
+  if (d.inbox && d.inbox.count > 0) {
+    const oldest =
+      d.inbox.oldestDays !== undefined && d.inbox.oldestDays > 0
+        ? ` (oldest ${d.inbox.oldestDays} day${d.inbox.oldestDays === 1 ? "" : "s"})`
+        : "";
+    lines.push(field("INBOX", `${d.inbox.count} to triage${oldest}`));
     lines.push(blank);
   }
 
