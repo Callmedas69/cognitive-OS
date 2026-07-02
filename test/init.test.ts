@@ -44,6 +44,13 @@ describe("runInit — fresh dir produces the complete structure", () => {
     }
   });
 
+  it("client-work project type → engagement stage folders land through the atomic merge", () => {
+    runInit(dir, answers({ projectType: "client-work", projectName: "acme-audit" }));
+    for (const stage of ["intake", "proposal", "delivery", "wrap-up"]) {
+      expect(existsSync(join(dir, "projects", "acme-audit", stage, "CONTEXT.md")), stage).toBe(true);
+    }
+  });
+
   it("mixed (minimal) project type → projects/<name>/ survives the atomic merge (regression)", () => {
     runInit(dir, answers({ projectType: "mixed", projectName: "web-app" }));
     expect(existsSync(join(dir, "projects", "web-app", "CONTEXT.md"))).toBe(true);

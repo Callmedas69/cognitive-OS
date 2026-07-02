@@ -23,14 +23,21 @@ describe("first-run-block source", () => {
     expect(SETUP_SENTINEL.endsWith("-->")).toBe(true);
   });
 
-  it("block has the marker heading + all 5 interview questions", () => {
+  it("block has the marker heading + all 6 interview questions", () => {
     expect(FIRST_RUN_BLOCK).toContain(FIRST_RUN_MARKER);
     expect(FIRST_RUN_BLOCK).toContain(SETUP_SENTINEL);
-    for (const n of ["1.", "2.", "3.", "4.", "5."]) {
+    expect(FIRST_RUN_BLOCK).toContain("6 quick questions");
+    for (const n of ["1.", "2.", "3.", "4.", "5.", "6."]) {
       expect(FIRST_RUN_BLOCK).toContain(n);
     }
     expect(FIRST_RUN_BLOCK).toMatch(/who is it for/i);
     expect(FIRST_RUN_BLOCK).toMatch(/watch out for/i);
+  });
+
+  it("carries the working-mode question and adapts thinking per role", () => {
+    expect(FIRST_RUN_BLOCK).toMatch(/yourself, a client, or an audience/i);
+    expect(FIRST_RUN_BLOCK).toContain("Working mode");
+    expect(FIRST_RUN_BLOCK).toMatch(/scope and\s+deadline discipline/i);
   });
 });
 

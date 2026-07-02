@@ -3,6 +3,7 @@ import { blockchainTemplate } from "./blockchain.js";
 import { fullstackTemplate } from "./fullstack.js";
 import { cliToolTemplate } from "./cli-tool.js";
 import { contentTemplate } from "./content.js";
+import { clientWorkTemplate } from "./client-work.js";
 import { minimalTemplate } from "./minimal.js";
 
 // Project-type → folder template (PRD 5.2 / 7.4 Q2).
@@ -13,5 +14,6 @@ export const PROJECT_TEMPLATES: Record<ProjectType, ProjectTemplate> = {
   fullstack: fullstackTemplate,
   "cli-tool": cliToolTemplate,
   content: contentTemplate,
+  "client-work": clientWorkTemplate,
   mixed: minimalTemplate,
 };

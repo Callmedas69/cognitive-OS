@@ -39,6 +39,15 @@ describe("generateProjectTemplate", () => {
     }
   });
 
+  it("client-work → root CONTEXT.md + 4 engagement stages, each with CONTEXT.md", () => {
+    generateProjectTemplate(dir, base({ projectType: "client-work" }));
+    const root = join(dir, "projects", "my-dapp");
+    expect(existsSync(join(root, "CONTEXT.md"))).toBe(true);
+    for (const stage of ["intake", "proposal", "delivery", "wrap-up"]) {
+      expect(existsSync(join(root, stage, "CONTEXT.md")), stage).toBe(true);
+    }
+  });
+
   it("mixed (minimal) → project root with a CONTEXT.md (folder survives merge), no stages", () => {
     generateProjectTemplate(dir, base({ projectType: "mixed" }));
     const root = join(dir, "projects", "my-dapp");

@@ -28,7 +28,7 @@ If \`STATE.md\` still contains the marker \`${SETUP_SENTINEL}\`, the project con
 has not been filled in yet — it is still the scaffold. Once, at the start of the
 first session (and never again after), offer to set it up:
 
-> "Want a 60-second setup? I'll ask 5 quick questions so I always know this
+> "Want a 60-second setup? I'll ask 6 quick questions so I always know this
 > project's context. (Y/n)"
 
 - If the user declines or wants to start working, **do not push** — leave the
@@ -38,16 +38,22 @@ first session (and never again after), offer to set it up:
   user to confirm or correct rather than asking cold:
 
   1. One line — what is this project, and who is it for?
-  2. What's the goal for this phase? (How will you know it's done?)
-  3. Stack, key tools, and any hard constraints?
-  4. Where are you right now — what's the very next action?
-  5. Anything to watch out for? (Decisions already made, gotchas, no-gos.)
+  2. Who is this for — yourself, a client, or an audience? (If a client:
+     client name + any delivery rules.)
+  3. What's the goal for this phase? (How will you know it's done?)
+  4. Stack, key tools, and any hard constraints?
+  5. Where are you right now — what's the very next action?
+  6. Anything to watch out for? (Decisions already made, gotchas, no-gos.)
 
 Then write the answers in:
-- \`projects/<project>/CONTEXT.md\` — Role/summary (Q1), Goal (Q2), Stack +
-  Constraints (Q3), Notes/watch-outs (Q5).
-- \`STATE.md\` — Current Focus task (Q4) and the "Watch out for" handoff line (Q5).
-- \`focus/current-task.md\` — the single next action from Q4 (exactly one task).
+- \`projects/<project>/CONTEXT.md\` — Role/summary (Q1), Working mode (Q2), Goal
+  (Q3), Stack + Constraints (Q4), Notes/watch-outs (Q6).
+- \`STATE.md\` — Current Focus task (Q5) and the "Watch out for" handoff line (Q6).
+- \`focus/current-task.md\` — the single next action from Q5 (exactly one task).
+
+Adapt your thinking to the Working mode from then on: client work → scope and
+deadline discipline (log every scope change); audience work → publishing cadence
+and voice; own project → momentum over polish.
 
 Finally, **remove the \`${SETUP_SENTINEL}\` line from STATE.md** so the offer never
 repeats. Keep it tight — this is setup, not a meeting.`;

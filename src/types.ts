@@ -5,6 +5,7 @@ export type ProjectType =
   | "fullstack"
   | "cli-tool"
   | "content"
+  | "client-work"
   | "mixed";
 
 export type AgentChoice =
