@@ -41,17 +41,31 @@ export function findLastSessionDate(targetDir: string): string | undefined {
   return dates.at(-1);
 }
 
+/** Pull one `- **Key:** value` field out of current-task.md content. "—" = unset. */
+export function parseTaskField(content: string, key: string): string | undefined {
+  const m = new RegExp(`\\*\\*${key}:\\*\\*\\s*(.*)`).exec(content);
+  const v = m?.[1].trim();
+  return v && v !== "—" ? v : undefined;
+}
+
+function readTaskField(targetDir: string, key: string): string | undefined {
+  const path = join(targetDir, "focus", "current-task.md");
+  if (!existsSync(path)) return undefined;
+  return parseTaskField(readFileSync(path, "utf8"), key);
+}
+
 /**
  * The actual task text from focus/current-task.md, or undefined. Reads the
  * `**Task:** value` line (the format the skill + check enforce); the scaffold
- * placeholder file has no such line, so it naturally reads as "no task".
+ * placeholder reads as "no task".
  */
 export function readCurrentTask(targetDir: string): string | undefined {
-  const path = join(targetDir, "focus", "current-task.md");
-  if (!existsSync(path)) return undefined;
-  const m = /\*\*Task:\*\*\s*(.*)/.exec(readFileSync(path, "utf8"));
-  const v = m?.[1].trim();
-  return v && v !== "—" ? v : undefined;
+  return readTaskField(targetDir, "Task");
+}
+
+/** The task's stop condition (`**Done when:**`), or undefined. The anti-hyperfocus line. */
+export function readDoneWhen(targetDir: string): string | undefined {
+  return readTaskField(targetDir, "Done when");
 }
 
 /** Gather Mission Control data from a project dir. Returns null if not initialized. */
@@ -78,6 +92,7 @@ export function buildMissionControl(
 
   return {
     stale: stale.stale ? { daysBehind: stale.daysBehind, source: stale.source } : undefined,
+    doneWhen: readDoneWhen(targetDir),
     focus: memory.currentFocus,
     lastSession: lastDate ? relativeSession(parseSessionDate(lastDate), now) : undefined,
     loops: memory.openLoops ?? [],

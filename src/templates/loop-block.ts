@@ -27,5 +27,12 @@ rhythm — silently, without narrating it:
 
 4. Re-read the state before the next action. Don't assume multiple steps ahead.
 
+5. Stop at done. current-task.md carries a "Done when" line — when it is met,
+   stop working: log the win to sessions/, clear the task, and offer to end the
+   session or deliberately pick the next task from queue/. Never slide into a
+   new task unprompted. Hyperfocus is a failure mode, the same as losing
+   context — the stop is part of the work, not an interruption. If a task has
+   no "Done when", ask for one (that's the one allowed question).
+
 Never skip reading state first. Never hold more than one current task. For quick
 questions or simple chat, just answer directly — this rhythm is for real work.`;

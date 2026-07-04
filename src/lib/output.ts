@@ -14,6 +14,8 @@ export interface MissionControlData {
   inbox?: { count: number; oldestDays?: number };
   /** Handoff staleness — files changed after the last STATE.md save. */
   stale?: { daysBehind: number; source?: string };
+  /** The current task's stop condition — shown under NEXT when set. */
+  doneWhen?: string;
 }
 
 const INNER = 56; // content width → total line 60 cols, well under 80
@@ -98,8 +100,9 @@ export function renderMissionControl(d: MissionControlData): string {
     lines.push(blank);
   }
 
-  // NEXT
+  // NEXT (with its stop condition — knowing when to stop is the hyperfocus guard)
   lines.push(field("NEXT", d.next));
+  if (d.doneWhen) lines.push(row(`${" ".repeat(LABEL)}done when: ${d.doneWhen}`));
   lines.push(blank);
 
   // RECENT (only when present)

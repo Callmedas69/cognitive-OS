@@ -27,6 +27,7 @@ function renderPlain(d: MissionControlData): string {
   if (d.blocker) lines.push(`Blocker: ${d.blocker}`);
   if (d.recent) lines.push(`Recently: ${d.recent}`);
   lines.push(`Next: ${d.next}`);
+  if (d.doneWhen) lines.push(`Done when: ${d.doneWhen} (when met — stop, log, clear the task)`);
   lines.push("", "Read STATE.md before acting. Enforce one task in focus/current-task.md.");
   return lines.join("\n");
 }

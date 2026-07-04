@@ -11,7 +11,13 @@ const SEEDS: Record<string, Record<string, string>> = {
     "sorted.md": "# queue — sorted\n\n> Prioritized backlog. Smallest next action first.\n",
   },
   focus: {
-    "current-task.md": "# Current Task\n\n_No task set. Pull one from queue/ when ready._\n",
+    // Structured so the parser (`**Task:**`) and the stop condition
+    // (`**Done when:**`) work from day one. "—" reads as unset.
+    "current-task.md":
+      "# Current Task\n\n" +
+      "- **Task:** —\n" +
+      "- **Done when:** —\n\n" +
+      "_One task only. When \"done when\" is met: stop, log to sessions/, clear this file, and decide the next thing deliberately._\n",
     "session-notes.md": "# focus — session notes\n",
   },
   ideas: {

@@ -42,14 +42,16 @@ first session (and never again after), offer to set it up:
      client name + any delivery rules.)
   3. What's the goal for this phase? (How will you know it's done?)
   4. Stack, key tools, and any hard constraints?
-  5. Where are you right now — what's the very next action?
+  5. Where are you right now — what's the very next action, and how will you
+     know it's done?
   6. Anything to watch out for? (Decisions already made, gotchas, no-gos.)
 
 Then write the answers in:
 - \`projects/<project>/CONTEXT.md\` — Role/summary (Q1), Working mode (Q2), Goal
   (Q3), Stack + Constraints (Q4), Notes/watch-outs (Q6).
 - \`STATE.md\` — Current Focus task (Q5) and the "Watch out for" handoff line (Q6).
-- \`focus/current-task.md\` — the single next action from Q5 (exactly one task).
+- \`focus/current-task.md\` — the single next action from Q5 as \`- **Task:** …\`
+  plus its stop condition as \`- **Done when:** …\` (exactly one task).
 
 Adapt your thinking to the Working mode from then on: client work → scope and
 deadline discipline (log every scope change); audience work → publishing cadence

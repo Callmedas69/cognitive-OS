@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, writeFileSync, rmSync, renameSync } from "node:fs";
 import { join } from "node:path";
 import { parseStateContent } from "../lib/parser.js";
+import { parseTaskField } from "./start.js";
 import { inboxStats } from "../lib/inbox.js";
 import { stalenessInfo } from "../lib/staleness.js";
 import { safeWrite } from "../lib/fs-utils.js";
@@ -176,6 +177,23 @@ export function runChecks(targetDir: string, now: Date = new Date()): CheckResul
       label: "current-task.md",
       ok: count <= 1,
       detail: count <= 1 ? `${count} task (ok)` : `${count} tasks (must be <= 1)`,
+    });
+
+    // 6b. done-when — a task without a stop condition is a hyperfocus risk.
+    // Soft ⚠ only: the stop condition is a judgment call, never --fix.
+    const hasTask = count === 1 && parseTaskField(taskContent, "Task") !== undefined;
+    const hasDoneWhen = parseTaskField(taskContent, "Done when") !== undefined;
+    results.push({
+      label: "done-when",
+      ok: true,
+      warn: hasTask && !hasDoneWhen,
+      detail: !hasTask
+        ? count > 1
+          ? "n/a (fix current-task.md first)"
+          : "n/a (no task set)"
+        : hasDoneWhen
+          ? "set"
+          : "task has no stop condition — add a **Done when:** line",
     });
   }
 

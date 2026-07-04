@@ -67,6 +67,7 @@ ${blockchainBlock}
 - Max 3 action items per response
 - Max 1 question per response
 - current-task.md holds ONE task only — enforce this, always
+- Every task carries a "Done when" — when it's met: stop, log, clear. Don't chain into the next task unprompted
 - Session start: read STATE.md, show current focus + open loops
 - Session end: update STATE.md + append to sessions/YYYY-MM-DD.md
 
