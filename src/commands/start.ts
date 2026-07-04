@@ -68,6 +68,18 @@ export function readDoneWhen(targetDir: string): string | undefined {
   return readTaskField(targetDir, "Done when");
 }
 
+/** How many `**Task:**` lines a current-task.md content holds. Invariant = exactly 0 or 1. */
+export function countTasks(content: string): number {
+  return (content.match(/\*\*Task:\*\*/g) ?? []).length;
+}
+
+/** countTasks against focus/current-task.md on disk. Missing file = 0. */
+export function countCurrentTasks(targetDir: string): number {
+  const path = join(targetDir, "focus", "current-task.md");
+  if (!existsSync(path)) return 0;
+  return countTasks(readFileSync(path, "utf8"));
+}
+
 /** Gather Mission Control data from a project dir. Returns null if not initialized. */
 export function buildMissionControl(
   targetDir: string,
@@ -90,9 +102,14 @@ export function buildMissionControl(
   // Handoff staleness — surfaced so the resume is honest, never confident-wrong.
   const stale = stalenessInfo(targetDir);
 
+  // One-task self-audit: every resume checks the invariant instead of waiting
+  // for the user to run `check`.
+  const taskCount = countCurrentTasks(targetDir);
+
   return {
     stale: stale.stale ? { daysBehind: stale.daysBehind, source: stale.source } : undefined,
     doneWhen: readDoneWhen(targetDir),
+    taskViolation: taskCount > 1 ? taskCount : undefined,
     focus: memory.currentFocus,
     lastSession: lastDate ? relativeSession(parseSessionDate(lastDate), now) : undefined,
     loops: memory.openLoops ?? [],

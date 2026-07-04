@@ -16,6 +16,8 @@ export interface MissionControlData {
   stale?: { daysBehind: number; source?: string };
   /** The current task's stop condition — shown under NEXT when set. */
   doneWhen?: string;
+  /** One-task invariant broken: number of tasks in focus/current-task.md (> 1). */
+  taskViolation?: number;
 }
 
 const INNER = 56; // content width → total line 60 cols, well under 80
@@ -45,6 +47,12 @@ export function renderMissionControl(d: MissionControlData): string {
   const blank = row("");
 
   const lines: string[] = [top, blank];
+
+  // ONE TASK broken — the invariant the whole focus/ zone exists for.
+  if (d.taskViolation) {
+    lines.push(row(`⚠ FOCUS     ${d.taskViolation} tasks in current-task.md — keep ONE`));
+    lines.push(blank);
+  }
 
   // STALE? (only when files moved after the last save — the resume data below
   // may predate the last real work; honest beats confident)

@@ -7,7 +7,14 @@ import type { Readable } from "node:stream";
 /** Plain-text Mission Control for injection (no ANSI — agents ingest raw text). */
 function renderPlain(d: MissionControlData): string {
   const lines: string[] = [];
-  // Staleness first — the agent must know the summary may predate the last
+  // Violated invariant first — fix the one-task rule before any other work.
+  if (d.taskViolation) {
+    lines.push(
+      `⚠ focus/current-task.md holds ${d.taskViolation} tasks — reduce it to exactly one before doing anything else.`,
+      ""
+    );
+  }
+  // Staleness next — the agent must know the summary may predate the last
   // real work before it acts on it.
   if (d.stale) {
     lines.push(

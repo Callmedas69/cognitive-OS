@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, writeFileSync, rmSync, renameSync } from "node:fs";
 import { join } from "node:path";
 import { parseStateContent } from "../lib/parser.js";
-import { parseTaskField } from "./start.js";
+import { parseTaskField, countTasks } from "./start.js";
 import { inboxStats } from "../lib/inbox.js";
 import { stalenessInfo } from "../lib/staleness.js";
 import { safeWrite } from "../lib/fs-utils.js";
@@ -172,7 +172,7 @@ export function runChecks(targetDir: string, now: Date = new Date()): CheckResul
   if (taskContent === null) {
     results.push({ label: "current-task.md", ok: false, detail: "missing" });
   } else {
-    const count = (taskContent.match(/\*\*Task:\*\*/g) ?? []).length;
+    const count = countTasks(taskContent);
     results.push({
       label: "current-task.md",
       ok: count <= 1,
