@@ -2,9 +2,10 @@ import { existsSync, readFileSync, writeFileSync, rmSync, renameSync } from "nod
 import { join } from "node:path";
 import { parseStateContent } from "../lib/parser.js";
 import { inboxStats } from "../lib/inbox.js";
+import { stalenessInfo } from "../lib/staleness.js";
 import { safeWrite } from "../lib/fs-utils.js";
 import { ZONE_CONTEXTS } from "../templates/contexts/index.js";
-import { wireSessionHooks } from "../generators/session-hook.js";
+import { wireSessionHooks, claudeStopWired } from "../generators/session-hook.js";
 import { LOOP_MARKER } from "../templates/loop-block.js";
 import { SETUP_SENTINEL } from "../templates/first-run-block.js";
 import type { AgentChoice } from "../types.js";
@@ -115,6 +116,22 @@ export function runChecks(targetDir: string, now: Date = new Date()): CheckResul
           : `ok (${inbox.count} item${inbox.count === 1 ? "" : "s"})`,
   });
 
+  // 1e. handoff staleness — session end is agent-honor; when zone files or
+  // session logs moved on a later day than the last STATE.md save, the resume
+  // handoff predates the last real work. Soft ⚠ only: the repair is a judgment
+  // write (the end-session update), never --fix.
+  if (stateForSetup !== null) {
+    const stale = stalenessInfo(targetDir);
+    results.push({
+      label: "handoff",
+      ok: true,
+      warn: stale.stale,
+      detail: stale.stale
+        ? `may be stale — ${stale.source} changed ${stale.daysBehind} day${stale.daysBehind === 1 ? "" : "s"} after the last STATE.md save (run the end-session update)`
+        : "fresh",
+    });
+  }
+
   // 2 + 3. skill files contain the zone routing table (when present)
   for (const [label, content] of [
     ["AGENTS.md", agents],
@@ -208,6 +225,17 @@ export function runChecks(targetDir: string, now: Date = new Date()): CheckResul
       label: "session-hook",
       ok: missing.length === 0,
       detail: missing.length === 0 ? "wired" : `not wired: ${missing.map((m) => m.name).join(", ")}`,
+    });
+  }
+
+  // 11. deterministic stop hook (Claude only) — the session-end save reminder.
+  // Without it, session end is honor-system and the handoff goes stale.
+  if (expected.some((a) => a.name === "claude")) {
+    const wired = claudeStopWired(targetDir);
+    results.push({
+      label: "stop-hook",
+      ok: wired,
+      detail: wired ? "wired" : "not wired (session-end reminder off)",
     });
   }
 

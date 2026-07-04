@@ -39,7 +39,7 @@ your-project/
 
 `init` also installs a **cognitiveOS agent skill** (`SKILL.md` for Claude Code / Codex / Antigravity, a `.mdc` rule for Cursor) — the operating manual your agent triggers automatically. It carries the zone routing, the one-task + ADHD response rules, and a silent **work loop**: read state → one action → update → re-read.
 
-Your agent reads `STATE.md` at session start and updates it at session end — automatically. You never run a "save" command.
+Your agent reads `STATE.md` at session start automatically. At session end it saves state back — and if it forgets, a deterministic **Stop hook** (Claude Code) reminds it before the day ends, and Mission Control flags a stale handoff instead of confidently showing old data. You never run a "save" command.
 
 **This is not a productivity system. It's a cognitive prosthetic.** A productivity system asks you to maintain it. This maintains itself.
 
@@ -52,6 +52,7 @@ cognitiveos init     # one-time setup (3 questions)
 cognitiveos start    # Mission Control — where you left off, in your terminal
 cognitiveos dump "thought"   # capture anything, zero friction
 cognitiveos check    # verify everything is wired correctly (--fix to repair)
+cognitiveos install-skill    # install the global /cognitiveos skill (--agent claude|codex|antigravity|all)
 ```
 
 ---
@@ -76,7 +77,7 @@ function cd { Set-Location @args; cognitiveos start 2>$null }
 
 For Claude Code and Antigravity, `init` wires a **deterministic session hook** so your agent loads `STATE.md` the moment a session opens — zero typing, can't be skipped. `check` verifies the wiring stays in place; `check --fix` restores it.
 
-- **Claude Code** → `.claude/settings.json` (`SessionStart`)
+- **Claude Code** → `.claude/settings.json` (`SessionStart` + `Stop` — the Stop hook nudges the agent to save `STATE.md` once per working day, so the handoff never silently goes stale)
 - **Antigravity** → `.agents/hooks.json` (`PreInvocation`)
 
 If the hook ever misfires, nothing breaks — the agent skill still tells your agent to read `STATE.md` first thing.

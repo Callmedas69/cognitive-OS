@@ -26,9 +26,22 @@ function entriesContainMarker(value: unknown): boolean {
   return value.some((e) => JSON.stringify(e ?? {}).includes(MARKER));
 }
 
-/** Claude idempotency: only scan the real SessionStart entries, not the whole config. */
-function alreadyWiredClaude(data: JsonObject): boolean {
-  return entriesContainMarker((data.hooks as JsonObject | undefined)?.SessionStart);
+/** Claude events we wire. One command serves both — the runtime branches on
+ * hook_event_name: SessionStart injects Mission Control, Stop reminds the
+ * agent to save STATE.md when it hasn't been saved today. */
+const CLAUDE_EVENTS = ["SessionStart", "Stop"] as const;
+
+/** Claude idempotency: only scan the real entries of one event, not the whole config. */
+function alreadyWiredClaude(data: JsonObject, event: (typeof CLAUDE_EVENTS)[number]): boolean {
+  return entriesContainMarker((data.hooks as JsonObject | undefined)?.[event]);
+}
+
+/** True when .claude/settings.json carries our command under hooks.Stop. */
+export function claudeStopWired(targetDir: string): boolean {
+  const path = join(targetDir, ".claude", "settings.json");
+  if (!existsSync(path)) return false;
+  const loaded = loadJson(path);
+  return loaded.ok && alreadyWiredClaude(loaded.data, "Stop");
 }
 
 /** Antigravity idempotency: only scan our named hook's PreInvocation entries. */
@@ -42,14 +55,14 @@ function asArray(v: unknown): unknown[] {
   return Array.isArray(v) ? v : [];
 }
 
-/** Claude: .claude/settings.json → hooks.SessionStart[] += our command entry. */
+/** Claude: .claude/settings.json → hooks.SessionStart[] and hooks.Stop[] += our command entry. */
 function wireClaude(targetDir: string, res: SessionHookResult): void {
   const rel = ".claude/settings.json";
   const path = join(targetDir, ".claude", "settings.json");
   const entry = {
     hooks: [{ type: "command", command: `npx -y ${MARKER} --agent=claude` }],
   };
-  const full = { hooks: { SessionStart: [entry] } };
+  const full = { hooks: { SessionStart: [entry], Stop: [entry] } };
   const snippet = JSON.stringify(full, null, 2);
 
   if (!existsSync(path)) {
@@ -63,19 +76,23 @@ function wireClaude(targetDir: string, res: SessionHookResult): void {
     return;
   }
   const data = loaded.data;
-  if (alreadyWiredClaude(data)) {
-    // already present — nothing written this run (keeps --fix honest)
-    return;
-  }
   const hooks = (data.hooks as JsonObject) ?? {};
-  const existing = hooks.SessionStart;
-  if (existing !== undefined && !Array.isArray(existing)) {
-    // User put a non-array under SessionStart — appending would silently drop it.
-    // Leave the file untouched and report so the user wires it by hand.
-    res.manual.push({ file: rel, snippet });
-    return;
+  for (const event of CLAUDE_EVENTS) {
+    const existing = hooks[event];
+    if (existing !== undefined && !Array.isArray(existing)) {
+      // User put a non-array under this event — appending would silently drop it.
+      // Leave the file untouched and report so the user wires it by hand.
+      res.manual.push({ file: rel, snippet });
+      return;
+    }
   }
-  hooks.SessionStart = [...asArray(existing), entry];
+  let changed = false;
+  for (const event of CLAUDE_EVENTS) {
+    if (alreadyWiredClaude(data, event)) continue; // keeps --fix honest per event
+    hooks[event] = [...asArray(hooks[event]), entry];
+    changed = true;
+  }
+  if (!changed) return; // both present — nothing written this run
   data.hooks = hooks;
   backupAndWrite(path, data);
   res.wired.push(rel);

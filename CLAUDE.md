@@ -6,18 +6,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **cognitiveOS** — an npm CLI that scaffolds an ICM (Interpreted Context Methodology) filesystem for solo developers with ADHD. The CLI generates markdown files + agent config once; after that the AI agent + hooks do all the work. **The CLI is a scaffolding tool, not a runtime.** No servers, no database, no network calls, no telemetry.
 
-> Status: **MVP built + published** (`cognitiveos@0.0.1` beta on npm; live on `main`, CI green). All 4 commands work. Three add-ons shipped ahead of the T-034 gate: a **cross-agent agent skill** (`SKILL.md` for Claude/Codex/Antigravity + `.cursor/rules/*.mdc`), a **deterministic session-start hook** (`start --hook`, wired into `.claude/settings.json` + `.agents/hooks.json`), and the **in-session agentic loop** (shared `LOOP_BLOCK` in the skill files). `check` runs 10 checks. Build sequence below is the original TTD; the full spec lives in the vault (see Source-of-truth docs).
+> Status: **MVP built + published** (`cognitiveos@0.5.0` on npm `latest`; live on `main`, CI green). All 5 commands work: `init`, `start`, `dump`, `check` (+`--fix`), `install-skill`. Shipped beyond the original MVP: a **cross-agent agent skill** (`SKILL.md` for Claude/Codex/Antigravity + `.cursor/rules/*.mdc`), **deterministic session hooks** (`start --hook`, wired into `.claude/settings.json` `SessionStart` + `Stop` and `.agents/hooks.json` `PreInvocation`), the **in-session agentic loop** (shared `LOOP_BLOCK`), the **first-run interview** (6 Qs, sentinel-gated, agent-run) + a Claude **keeper subagent** (`.claude/agents/cognitiveos-keeper.md`), 6 project-type templates, and staleness/inbox-rot/max-3 advisory checks. Build sequence below is the original TTD; the full spec lives in the vault (see Source-of-truth docs).
 
 ## Source-of-truth docs (read before building)
 
 Specs are NOT in this repo. They live in the Obsidian vault:
-`D:\Harry\00_THE-VAULT\04_PROJECTS\active\cognitiveos\docs\`
+`D:\Harry\00_THE-VAULT\04_PROJECTS\01_development\cognitiveos\docs\`
 
-- `cognitive-os_prd.md` — product requirements (zones, use cases, architecture, success metrics)
-- `cognitive-os_tdd.md` — technical design (repo structure §2, module specs §4, data contracts §5)
-- [`cognitive-os_ttd.md`](file:///D:/Harry/00_THE-VAULT/04_PROJECTS/active/cognitiveos/docs/cognitive-os_ttd.md) — task list (T-001 → T-050, strictly ordered, with "done when" gates)
-- `cognitive-os_thesis.md` — the "why" (cognitive prosthetic vs productivity system)
-- `cognitive-os_readme.md` — the shipped README draft
+- `cognitiveos-prd.md` — product requirements (zones, use cases, architecture, success metrics)
+- `cognitiveos-tdd.md` — technical design (repo structure §2, module specs §4, data contracts §5)
+- [`cognitiveos-ttd.md`](file:///D:/Harry/00_THE-VAULT/04_PROJECTS/01_development/cognitiveos/docs/cognitiveos-ttd.md) — task list (T-001 → T-050, strictly ordered, with "done when" gates)
+- `cognitiveos-thesis.md` — the "why" (cognitive prosthetic vs productivity system)
+- `cognitiveos-readme.md` — the shipped README draft
+- `ADR-01…06` — accepted decisions (state naming, memory restructure, agentic loop, TUI, session hooks, first-run interview)
 
 **Build order is the TTD.** Find the first unchecked task, do only that one, check it off, commit. Tasks are strictly ordered — no skipping unless blocked.
 
@@ -71,13 +72,13 @@ On any stop-line: commit work so far, write state to vault `CONTEXT.md`, halt, s
 ```bash
 npm install
 npm run build                 # tsup: src/cli.ts → dist/
-node dist/cli.js --help       # must list all 4 subcommands
+node dist/cli.js --help       # must list all 5 subcommands
 npx vitest                    # run test suite
 npx vitest test/parser.test.ts   # run a single test file
 npx vitest -t "malformed"     # run tests matching a name
 ```
 
-The shipped CLI exposes 4 subcommands: `init`, `start`, `dump`, `check` (`check --fix`).
+The shipped CLI exposes 5 subcommands: `init`, `start`, `dump`, `check` (`check --fix`), `install-skill`.
 
 ## Tech stack
 
@@ -90,14 +91,14 @@ The shipped CLI exposes 4 subcommands: `init`, `start`, `dump`, `check` (`check 
 
 CLI generates files once, then gets out of the way. Layering:
 
-- `src/commands/` — the 4 subcommands. `init` orchestrates generators; `start` reads STATE.md and renders Mission Control; `dump` appends to inbox; `check` detects silent failures.
+- `src/commands/` — the 5 subcommands. `init` orchestrates generators; `start` reads STATE.md and renders Mission Control; `dump` appends to inbox; `check` detects silent failures; `install-skill` writes the global skill to home agent dirs.
 - `src/generators/` — turn templates into files on disk (zones, state, skill-files, hooks, project-template).
 - `src/templates/` — all markdown as typed JS string functions (`contexts/`, `hooks/`, `project-types/`). No file fixtures — templates are code.
 - `src/lib/` — `fs-utils.ts` (safe/atomic writes), `parser.ts` (STATE.md section parser), `output.ts` (chalk formatting).
 
 **What `init` generates** in a user's project: `CLAUDE.md` + `AGENTS.md` (identical routing tables, including the shared `LOOP_BLOCK`), `STATE.md`, 6 zone folders each with `CONTEXT.md` (brain-dump, queue, focus, projects, ideas, someday), `.claude/commands/` slash hooks, the **agent skill** per selected agent (`.claude`/`.codex`/`.agents/skills/cognitiveos/SKILL.md` + `.cursor/rules/cognitiveos.mdc`), the **session-start hook** wiring (`.claude/settings.json` + `.agents/hooks.json`), `sessions/`, and `projects/[name]/` from a project-type template.
 
-Beyond the 4 user commands, `start` has a machine-only `--hook --agent=<claude|antigravity>` mode (reads hook stdin, emits the agent's session-start envelope; never throws). Generators: `src/generators/agent-skill.ts` (skill files), `src/generators/session-hook.ts` (backup-safe config merge). Templates: `src/templates/cognitiveos-skill.md.ts`, `src/templates/loop-block.ts`.
+Beyond the 5 user commands, `start` has a machine-only `--hook --agent=<claude|antigravity>` mode (reads hook stdin; on SessionStart emits the injection envelope, on Claude Stop emits a once-per-day end-session save reminder when STATE.md wasn't saved today; never throws). Generators: `src/generators/agent-skill.ts` (skill files), `src/generators/session-hook.ts` (backup-safe config merge, SessionStart + Stop), `src/generators/keeper-agent.ts` (Claude keeper subagent). Templates: `src/templates/cognitiveos-skill.md.ts`, `src/templates/loop-block.ts`, `src/templates/first-run-block.ts`. Staleness detection: `src/lib/staleness.ts` (mtime day-granularity; feeds `check` ⚠ handoff, Mission Control STALE? line, and the Stop hook).
 
 ## Non-negotiable invariants
 

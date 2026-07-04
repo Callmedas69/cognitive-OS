@@ -12,6 +12,8 @@ export interface MissionControlData {
   pickUpReason?: string;
   /** brain-dump/inbox.md stats — INBOX line shown only when count > 0. */
   inbox?: { count: number; oldestDays?: number };
+  /** Handoff staleness — files changed after the last STATE.md save. */
+  stale?: { daysBehind: number; source?: string };
 }
 
 const INNER = 56; // content width → total line 60 cols, well under 80
@@ -41,6 +43,17 @@ export function renderMissionControl(d: MissionControlData): string {
   const blank = row("");
 
   const lines: string[] = [top, blank];
+
+  // STALE? (only when files moved after the last save — the resume data below
+  // may predate the last real work; honest beats confident)
+  if (d.stale) {
+    lines.push(
+      row(
+        `⚠ STALE?   saved ${d.stale.daysBehind} day${d.stale.daysBehind === 1 ? "" : "s"} before last activity`
+      )
+    );
+    lines.push(blank);
+  }
 
   // PICK UP (headline — the next action from Session Handoff; what an ADHD user
   // needs first: not "here's your state" but "here's literally the next thing").

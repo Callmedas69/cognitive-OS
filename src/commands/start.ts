@@ -2,6 +2,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { parseState } from "../lib/parser.js";
 import { inboxStats } from "../lib/inbox.js";
+import { stalenessInfo } from "../lib/staleness.js";
 import { renderMissionControl, type MissionControlData } from "../lib/output.js";
 
 const SESSION_FILE = /^(\d{4}-\d{2}-\d{2})\.md$/;
@@ -72,7 +73,11 @@ export function buildMissionControl(
   // moment of task initiation (the moment ADHD loses).
   const task = readCurrentTask(targetDir);
 
+  // Handoff staleness — surfaced so the resume is honest, never confident-wrong.
+  const stale = stalenessInfo(targetDir);
+
   return {
+    stale: stale.stale ? { daysBehind: stale.daysBehind, source: stale.source } : undefined,
     focus: memory.currentFocus,
     lastSession: lastDate ? relativeSession(parseSessionDate(lastDate), now) : undefined,
     loops: memory.openLoops ?? [],
