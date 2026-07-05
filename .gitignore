@@ -6,3 +6,8 @@ dist/
 .env.local
 coverage/
 .npmrc
+
+# local scratch / eval artifacts — never publish
+skill-eval-workspace/
+temp-folder/
+*.tgz

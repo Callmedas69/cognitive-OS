@@ -1,4 +1,0 @@
-[
-  {"query": "catch me up on where i left off in this cognitiveos project", "should_trigger": true},
-  {"query": "write me a python function that dedupes a list of dicts by the id field", "should_trigger": false}
-]
