@@ -7,6 +7,15 @@ import type { Readable } from "node:stream";
 /** Plain-text Mission Control for injection (no ANSI — agents ingest raw text). */
 function renderPlain(d: MissionControlData): string {
   const lines: string[] = [];
+  // First-run setup first — this is the deterministic trigger for the interview.
+  // The skill/keeper carry the full instructions, but only this envelope is
+  // guaranteed to reach the agent, so it must point there explicitly.
+  if (d.setupNeeded) {
+    lines.push(
+      '⚙ FIRST RUN — project context is not set up yet. Read the "## First run — set up project context" section of the cognitiveos skill (SKILL.md) and follow it now: offer the user the 60-second 6-question setup.',
+      ""
+    );
+  }
   // Violated invariant first — fix the one-task rule before any other work.
   if (d.taskViolation) {
     lines.push(

@@ -4,6 +4,8 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { runSessionHook } from "../src/commands/hook.js";
 import { readStdinThenHook } from "../src/commands/hook.js";
+import { buildMissionControl } from "../src/commands/start.js";
+import { SETUP_SENTINEL } from "../src/templates/first-run-block.js";
 
 let dir: string;
 beforeEach(() => {
@@ -21,6 +23,24 @@ describe("runSessionHook", () => {
     const out = runSessionHook(JSON.stringify({ invocationNum: 1 }), "antigravity", dir);
     const parsed = JSON.parse(out);
     expect(parsed.injectSteps[0].ephemeralMessage).toContain("Ship the session hook");
+  });
+
+  it("setup sentinel present → envelope leads with the FIRST RUN nudge", () => {
+    writeFileSync(
+      join(dir, "STATE.md"),
+      `${SETUP_SENTINEL}\n## Current Focus\nShip the session hook\n`,
+    );
+    const out = runSessionHook(JSON.stringify({ hook_event_name: "SessionStart" }), "claude", dir);
+    const text = JSON.parse(out).hookSpecificOutput.additionalContext as string;
+    expect(text).toContain("FIRST RUN");
+    expect(text).toContain("6-question setup");
+    expect(buildMissionControl(dir)?.setupNeeded).toBe(true);
+  });
+
+  it("no sentinel → no FIRST RUN nudge, setupNeeded unset", () => {
+    const out = runSessionHook(JSON.stringify({ hook_event_name: "SessionStart" }), "claude", dir);
+    expect(JSON.parse(out).hookSpecificOutput.additionalContext).not.toContain("FIRST RUN");
+    expect(buildMissionControl(dir)?.setupNeeded).toBeUndefined();
   });
 
   it("claude SessionStart event → additionalContext envelope", () => {

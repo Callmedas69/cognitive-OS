@@ -18,6 +18,8 @@ export interface MissionControlData {
   doneWhen?: string;
   /** One-task invariant broken: number of tasks in focus/current-task.md (> 1). */
   taskViolation?: number;
+  /** STATE.md still carries the setup-needed sentinel — first-run interview pending. */
+  setupNeeded?: boolean;
 }
 
 const INNER = 56; // content width → total line 60 cols, well under 80
@@ -47,6 +49,12 @@ export function renderMissionControl(d: MissionControlData): string {
   const blank = row("");
 
   const lines: string[] = [top, blank];
+
+  // SETUP pending — context is still the scaffold; the agent runs the interview.
+  if (d.setupNeeded) {
+    lines.push(row("⚙ SETUP    pending — your agent offers a 60-second setup"));
+    lines.push(blank);
+  }
 
   // ONE TASK broken — the invariant the whole focus/ zone exists for.
   if (d.taskViolation) {

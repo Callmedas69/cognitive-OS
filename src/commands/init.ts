@@ -250,8 +250,8 @@ export function runInit(
 export function renderSummary(projectDir: string): string {
   return [
     emerald(`✓ cognitiveOS ready in ${projectDir}`),
-    emerald("→  Next: open your agent and start working."),
-    muted("   It already knows your context."),
+    emerald("→  Next: open your agent."),
+    muted("   It will offer a 60-second setup (6 questions) to learn this project."),
   ].join("\n");
 }
 

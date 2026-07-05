@@ -57,7 +57,7 @@ describe("renderSummary", () => {
     expect(out).toContain("/tmp/my-proj");
     expect(out).toContain("✓ cognitiveOS ready in");
     expect(out).toContain("→  Next: open your agent");
-    expect(out).toContain("It already knows your context.");
+    expect(out).toContain("It will offer a 60-second setup (6 questions) to learn this project.");
     expect(out).not.toContain(ESC);
   });
 });
