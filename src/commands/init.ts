@@ -190,7 +190,10 @@ export async function offerSkillInstall(
 
   const yes = await confirmFn();
   if (!yes) {
-    note("Skipped. Run `cognitiveos install-skill` anytime to add it.", "skill");
+    note(
+      "Skipped — the project copy keeps working here.\nRun `cognitiveos install-skill` anytime to add the global one.",
+      "skill",
+    );
     return;
   }
 
@@ -325,7 +328,8 @@ export async function initCommand(
   if (prompt === undefined && process.stdin.isTTY) {
     await offerSkillInstall(answers.agents, () =>
       confirm({
-        message: "Install the global /cognitiveos skill too?",
+        message:
+          "Project skill installed (works in this folder). Also install globally, for every project?",
         initialValue: true,
       }).then((v) => v === true),
     );
