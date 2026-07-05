@@ -71,7 +71,7 @@ describe("keeper subagent template", () => {
   });
 });
 
-describe("init generates the keeper (Claude Code only)", () => {
+describe("init generates the Claude keeper for claude-code selections", () => {
   let dir: string;
   beforeEach(() => {
     dir = mkdtempSync(join(tmpdir(), "cogkeeper-"));
@@ -86,17 +86,17 @@ describe("init generates the keeper (Claude Code only)", () => {
     ...over,
   });
 
-  it("claude-code → keeper written", () => {
+  it("claude-code → .claude keeper written", () => {
     runInit(dir, answers());
     expect(existsSync(KEEPER())).toBe(true);
   });
 
-  it("all → keeper written", () => {
+  it("all four → .claude keeper written", () => {
     runInit(dir, answers({ agents: ["claude-code", "codex", "cursor", "antigravity"] }));
     expect(existsSync(KEEPER())).toBe(true);
   });
 
-  it("codex → no .claude, no keeper", () => {
+  it("codex-only → no .claude keeper (its keeper is the .codex .toml)", () => {
     runInit(dir, answers({ agents: ["codex"] }));
     expect(existsSync(KEEPER())).toBe(false);
   });

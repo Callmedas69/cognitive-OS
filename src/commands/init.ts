@@ -229,8 +229,9 @@ export function generateAll(
   generateAgentSkill(stageDir, answers);
   if (wantsClaudeHooks(answers.agents)) {
     generateHooks(stageDir);
-    generateKeeperAgent(stageDir, answers);
   }
+  // Keeper self-gates per selected agent (Claude/Cursor/Codex/Antigravity).
+  generateKeeperAgent(stageDir, answers);
   generateProjectTemplate(stageDir, answers);
   generateFirstSession(stageDir, now);
 }
