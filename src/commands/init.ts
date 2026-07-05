@@ -34,6 +34,14 @@ export function slugify(input: string): string {
     .replace(/^-|-$/g, "");
 }
 
+/**
+ * Q3 validator. @clack/core runs validate BEFORE finalize defaults the value
+ * to "", so untyped input arrives as undefined — never call .trim() on it raw.
+ */
+export function validateProjectName(v: string | undefined): string | undefined {
+  return v?.trim() ? undefined : "Project name can't be empty";
+}
+
 /** The 3 init questions (PRD 7.4) — never more. */
 export function buildQuestions() {
   return [
@@ -68,7 +76,7 @@ export function buildQuestions() {
       type: "input",
       name: "projectName",
       message: "[3/3] What's your current active project?",
-      validate: (v: string) => (v.trim().length > 0 ? true : "Project name can't be empty"),
+      validate: (v?: string) => validateProjectName(v) ?? true,
     },
   ];
 }
@@ -119,7 +127,7 @@ async function clackPrompt(_questions?: unknown): Promise<RawAnswers> {
   const projectName = await text({
     message: q[2].message,
     placeholder: "my-project",
-    validate: (v) => (v.trim().length > 0 ? undefined : "Project name can't be empty"),
+    validate: validateProjectName,
   });
   bailIfCancelled(projectName);
 

@@ -4,6 +4,7 @@ import {
   normalizeAnswers,
   runWizard,
   slugify,
+  validateProjectName,
   type RawAnswers,
 } from "../src/commands/init.js";
 import type { AgentChoice } from "../src/types.js";
@@ -28,6 +29,23 @@ describe("buildQuestions", () => {
     expect(msgs[0].startsWith("[1/3] ")).toBe(true);
     expect(msgs[1].startsWith("[2/3] ")).toBe(true);
     expect(msgs[2].startsWith("[3/3] ")).toBe(true);
+  });
+});
+
+describe("validateProjectName", () => {
+  // Regression: @clack/core validates BEFORE finalize defaults the value, so
+  // pressing Enter with no input passes undefined — must not throw (smoke test #5).
+  it("rejects undefined without throwing", () => {
+    expect(validateProjectName(undefined)).toBe("Project name can't be empty");
+  });
+
+  it("rejects empty and whitespace-only input", () => {
+    expect(validateProjectName("")).toBe("Project name can't be empty");
+    expect(validateProjectName("   ")).toBe("Project name can't be empty");
+  });
+
+  it("accepts real names", () => {
+    expect(validateProjectName("my-project")).toBeUndefined();
   });
 });
 

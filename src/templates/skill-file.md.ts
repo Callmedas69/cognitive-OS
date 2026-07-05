@@ -60,6 +60,12 @@ Each folder has a CONTEXT.md. Read it before acting in that zone.
 | Someday | someday/ | Not now, not never. |
 | History | sessions/ | Append-only session logs. Never edit. |
 
+## Naming Conventions
+- Files and folders: lowercase, hyphens, no spaces or symbols (\`my-project\`, not \`My Project\`).
+- Dates: ISO \`YYYY-MM-DD\` — session logs are \`sessions/YYYY-MM-DD.md\`.
+- Constants (never rename): \`CLAUDE.md\`, \`AGENTS.md\`, \`STATE.md\`, \`CONTEXT.md\`.
+- New project folders under projects/ follow the same slug rules as the active project.
+
 ## Active Project
 Current project: **${projectName}** (projects/${projectName}/)
 ${blockchainBlock}

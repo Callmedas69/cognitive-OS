@@ -19,6 +19,13 @@ describe("renderSkillFile", () => {
     expect(md).toContain("current-task.md holds ONE task only");
   });
 
+  it("documents naming conventions (smoke test #3)", () => {
+    const md = renderSkillFile({ projectName: "x", projectType: "content" });
+    expect(md).toContain("## Naming Conventions");
+    expect(md).toContain("lowercase, hyphens");
+    expect(md).toContain("YYYY-MM-DD");
+  });
+
   it("appends the 5-stage map only for blockchain projects", () => {
     const blockchain = renderSkillFile({ projectName: "p", projectType: "blockchain" });
     expect(blockchain).toContain("Blockchain project stages");
