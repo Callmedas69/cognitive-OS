@@ -7,7 +7,7 @@ import {
   validateProjectName,
   type RawAnswers,
 } from "../src/commands/init.js";
-import type { AgentChoice } from "../src/types.js";
+import type { AgentId } from "../src/types.js";
 
 describe("slugify", () => {
   it("lowercases, hyphenates spaces, strips symbols", () => {
@@ -29,6 +29,17 @@ describe("buildQuestions", () => {
     expect(msgs[0].startsWith("[1/3] ")).toBe(true);
     expect(msgs[1].startsWith("[2/3] ")).toBe(true);
     expect(msgs[2].startsWith("[3/3] ")).toBe(true);
+  });
+
+  it("Q1 is multiselect with the 4 agents and no 'All' pseudo-choice", () => {
+    const q1 = buildQuestions()[0];
+    expect(q1.type).toBe("multiselect");
+    expect(q1.choices?.map((c) => c.value)).toEqual([
+      "claude-code",
+      "codex",
+      "cursor",
+      "antigravity",
+    ]);
   });
 });
 
@@ -52,19 +63,23 @@ describe("validateProjectName", () => {
 describe("normalizeAnswers", () => {
   it("passes agents/projectType through and slugifies the name", () => {
     const out = normalizeAnswers({
-      agents: "codex",
+      agents: ["codex"],
       projectType: "blockchain",
       projectName: "My DApp",
     });
-    expect(out).toEqual({ agents: "codex", projectType: "blockchain", projectName: "my-dapp" });
+    expect(out).toEqual({ agents: ["codex"], projectType: "blockchain", projectName: "my-dapp" });
   });
 });
 
 describe("runWizard", () => {
-  const agentChoices: AgentChoice[] = ["claude-code", "codex", "antigravity", "all"];
+  const agentSelections: AgentId[][] = [
+    ["claude-code"],
+    ["codex", "cursor"],
+    ["claude-code", "codex", "cursor", "antigravity"],
+  ];
 
-  for (const agents of agentChoices) {
-    it(`produces correct answers for agents='${agents}'`, async () => {
+  for (const agents of agentSelections) {
+    it(`produces correct answers for agents=[${agents.join(",")}]`, async () => {
       const fake = async (): Promise<RawAnswers> => ({
         agents,
         projectType: "fullstack",

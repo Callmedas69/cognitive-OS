@@ -1,0 +1,171 @@
+{
+  "skill_name": "cognitiveos",
+  "description": "ICM (Interpreted Context Methodology) workflow for a cognitiveOS project. Use at the start of any work session to load STATE.md and show where you left off, and whenever the user is lost or resuming (\"where did I leave off\", \"what was I doing\", \"catch me up\", \"I'm lost\", \"what's next\", \"I forgot what I was working on\"). Also use to capture a stray thought without losing focus, to route a task to the right zone (brain-dump, queue, focus, projects, ideas, someday), to enforce the one-task and ADHD response rules, and at session end to save state and append a session log. Bootstraps a new project via `cognitiveos init` when STATE.md is absent.",
+  "results": [
+    {
+      "query": "ok im back, opening claude in my cognitiveos project after like 5 days off, what was i even doing here",
+      "should_trigger": true,
+      "trigger_rate": 0.3333333333333333,
+      "triggers": 1,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "where did i leave off on this",
+      "should_trigger": true,
+      "trigger_rate": 0.6666666666666666,
+      "triggers": 2,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "catch me up",
+      "should_trigger": true,
+      "trigger_rate": 0.6666666666666666,
+      "triggers": 2,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "honestly im lost. i had a thing i was in the middle of and i cant remember what",
+      "should_trigger": true,
+      "trigger_rate": 0.3333333333333333,
+      "triggers": 1,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "quick, dont lose my place but i just thought of something: we should add rate limiting to the webhook later. note that down somewhere",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "i wrote some notes about a new pricing idea, which folder should this go in - is that a queue thing or an ideas thing?",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "alright im done for tonight, save where we are so future me isnt confused tomorrow",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "whats next",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "im starting a fresh session on the starc repo, get me oriented before we touch anything",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "i keep jumping between three things and losing track, can you just tell me the one thing to do right now",
+      "should_trigger": true,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": false
+    },
+    {
+      "query": "whats on my google calendar for today, do i have any meetings before noon",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "theres a failing vitest in the arcnotify repo, test/webhook.test.ts line 40, can you figure out why and fix it",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "summarize this 30 page PDF spec i just dropped in downloads and pull out the API rate limits",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "write me a python function that dedupes a list of dicts by the id field",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "git is telling me i have a detached HEAD on main, how do i get back without losing my last 2 commits",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "remind me to call the bank tomorrow at 10am about the wire transfer",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "my laptop is running super slow and the fan is going crazy, whats eating the cpu",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "i need to brain dump everything stressing me out about the SB launch, can we talk through it",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "what does the focus zone do in cognitiveos, explain the architecture of the tool",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    },
+    {
+      "query": "set up a new next.js 15 project with tailwind v4 and a basic landing page",
+      "should_trigger": false,
+      "trigger_rate": 0.0,
+      "triggers": 0,
+      "runs": 3,
+      "pass": true
+    }
+  ],
+  "summary": {
+    "total": 20,
+    "passed": 12,
+    "failed": 8
+  }
+}

@@ -119,7 +119,7 @@ describe("check — stop-hook (Claude)", () => {
 
   it("wireSessionHooks wires it; --fix restores a missing Stop entry", () => {
     installClaudeSkill();
-    wireSessionHooks(dir, { agents: "claude-code", projectType: "mixed", projectName: "p" });
+    wireSessionHooks(dir, { agents: ["claude-code"], projectType: "mixed", projectName: "p" });
     expect(claudeStopWired(dir)).toBe(true);
     expect(runChecks(dir).find((x) => x.label === "stop-hook")?.ok).toBe(true);
 
@@ -139,8 +139,8 @@ describe("check — stop-hook (Claude)", () => {
 
   it("fully wired config → wireSessionHooks writes nothing (idempotent)", () => {
     installClaudeSkill();
-    wireSessionHooks(dir, { agents: "claude-code", projectType: "mixed", projectName: "p" });
-    const res = wireSessionHooks(dir, { agents: "claude-code", projectType: "mixed", projectName: "p" });
+    wireSessionHooks(dir, { agents: ["claude-code"], projectType: "mixed", projectName: "p" });
+    const res = wireSessionHooks(dir, { agents: ["claude-code"], projectType: "mixed", projectName: "p" });
     expect(res.wired).toHaveLength(0);
     expect(existsSync(join(dir, ".claude", "settings.json.bak"))).toBe(false);
   });

@@ -4,31 +4,28 @@ import {
   renderClaudeCodexSkill,
   renderCursorRule,
 } from "../templates/cognitiveos-skill.md.js";
-import type { AgentChoice, InitAnswers } from "../types.js";
+import type { AgentId, InitAnswers } from "../types.js";
 
 /**
- * Native skill targets for each agent. `skillMd` = dirs that use the identical
- * SKILL.md format (Claude Code, Codex, Antigravity); `cursor` = the .mdc rule.
+ * Native skill targets for the selected agents. `skillMd` = dirs that use the
+ * identical SKILL.md format (Claude Code, Codex, Antigravity); `cursor` = the
+ * .mdc rule.
  */
-export function skillTargetsFor(agents: AgentChoice): {
+export function skillTargetsFor(agents: AgentId[]): {
   skillMd: string[];
   cursor: boolean;
 } {
   const skillMd: string[] = [];
-  let cursor = false;
-  if (agents === "claude-code" || agents === "all") {
+  if (agents.includes("claude-code")) {
     skillMd.push(join(".claude", "skills", "cognitiveos", "SKILL.md"));
   }
-  if (agents === "codex" || agents === "all") {
+  if (agents.includes("codex")) {
     skillMd.push(join(".codex", "skills", "cognitiveos", "SKILL.md"));
   }
-  if (agents === "antigravity" || agents === "all") {
+  if (agents.includes("antigravity")) {
     skillMd.push(join(".agents", "skills", "cognitiveos", "SKILL.md"));
   }
-  if (agents === "cursor" || agents === "all") {
-    cursor = true;
-  }
-  return { skillMd, cursor };
+  return { skillMd, cursor: agents.includes("cursor") };
 }
 
 /**

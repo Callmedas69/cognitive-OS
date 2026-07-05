@@ -1,23 +1,20 @@
 import { join } from "node:path";
 import { safeWrite } from "../lib/fs-utils.js";
 import { renderSkillFile } from "../templates/skill-file.md.js";
-import type { AgentChoice, InitAnswers } from "../types.js";
+import type { AgentId, InitAnswers } from "../types.js";
 
 /**
- * Which skill files to generate for the selected agent(s).
- * CLAUDE.md → Claude Code; AGENTS.md → Codex / Antigravity / Cursor; All → both.
+ * Which skill files to generate for the selected agents.
+ * CLAUDE.md → Claude Code; AGENTS.md → Codex / Antigravity / Cursor.
+ * Both appear when the selection spans Claude and any other agent.
  */
-export function skillFilesFor(agents: AgentChoice): string[] {
-  switch (agents) {
-    case "claude-code":
-      return ["CLAUDE.md"];
-    case "codex":
-    case "cursor":
-    case "antigravity":
-      return ["AGENTS.md"];
-    case "all":
-      return ["CLAUDE.md", "AGENTS.md"];
+export function skillFilesFor(agents: AgentId[]): string[] {
+  const files: string[] = [];
+  if (agents.includes("claude-code")) files.push("CLAUDE.md");
+  if (agents.some((a) => a === "codex" || a === "cursor" || a === "antigravity")) {
+    files.push("AGENTS.md");
   }
+  return files;
 }
 
 /**

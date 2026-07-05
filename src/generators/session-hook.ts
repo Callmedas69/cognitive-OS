@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import { safeWrite } from "../lib/fs-utils.js";
 import { loadJson, backupAndWrite, type JsonObject } from "../lib/config-merge.js";
-import type { AgentChoice, InitAnswers } from "../types.js";
+import type { AgentId, InitAnswers } from "../types.js";
 
 const MARKER = "cognitiveos start --hook";
 
@@ -13,11 +13,11 @@ export interface SessionHookResult {
   manual: { file: string; snippet: string }[];
 }
 
-function wantsClaude(a: AgentChoice): boolean {
-  return a === "claude-code" || a === "all";
+function wantsClaude(a: AgentId[]): boolean {
+  return a.includes("claude-code");
 }
-function wantsAntigravity(a: AgentChoice): boolean {
-  return a === "antigravity" || a === "all";
+function wantsAntigravity(a: AgentId[]): boolean {
+  return a.includes("antigravity");
 }
 
 /** True if any entry in a hook array carries our marker command. */

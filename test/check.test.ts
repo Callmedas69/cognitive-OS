@@ -11,7 +11,7 @@ let dir: string;
 beforeEach(() => {
   dir = mkdtempSync(join(tmpdir(), "cogcheck-"));
   // full install with both skill files + hooks (mirrors a real `init`)
-  const answers: InitAnswers = { agents: "all", projectType: "blockchain", projectName: "p" };
+  const answers: InitAnswers = { agents: ["claude-code", "codex", "cursor", "antigravity"], projectType: "blockchain", projectName: "p" };
   runInit(dir, answers, new Date(2026, 5, 13, 9, 0));
   wireSessionHooks(dir, answers);
 });

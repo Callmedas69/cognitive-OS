@@ -70,7 +70,7 @@ describe("buildMissionControl + findLastSessionDate (real memory.md)", () => {
   });
 
   it("reads focus + last session from a freshly initialized project", () => {
-    runInit(dir, { agents: "claude-code", projectType: "fullstack", projectName: "my-dapp" }, FIXED);
+    runInit(dir, { agents: ["claude-code"], projectType: "fullstack", projectName: "my-dapp" }, FIXED);
     const data = buildMissionControl(dir, FIXED)!;
     expect(data.focus?.project).toBe("my-dapp");
     expect(data.lastSession).toBe("today (Jun 13)");
@@ -79,7 +79,7 @@ describe("buildMissionControl + findLastSessionDate (real memory.md)", () => {
   });
 
   it("NEXT is the real task from focus/current-task.md, not a file pointer", () => {
-    runInit(dir, { agents: "claude-code", projectType: "mixed", projectName: "p" }, FIXED);
+    runInit(dir, { agents: ["claude-code"], projectType: "mixed", projectName: "p" }, FIXED);
     writeFileSync(
       join(dir, "focus", "current-task.md"),
       "# Current Task\n\n**Task:** Wire the login form validation\n",
@@ -89,14 +89,14 @@ describe("buildMissionControl + findLastSessionDate (real memory.md)", () => {
   });
 
   it("scaffold placeholder task file → fallback NEXT copy", () => {
-    runInit(dir, { agents: "claude-code", projectType: "mixed", projectName: "p" }, FIXED);
+    runInit(dir, { agents: ["claude-code"], projectType: "mixed", projectName: "p" }, FIXED);
     expect(readCurrentTask(dir)).toBeUndefined();
     const data = buildMissionControl(dir, FIXED)!;
     expect(data.next).toBe("No task set — pull the top item from queue/");
   });
 
   it("surfaces inbox stats from brain-dump/inbox.md", () => {
-    runInit(dir, { agents: "claude-code", projectType: "mixed", projectName: "p" }, FIXED);
+    runInit(dir, { agents: ["claude-code"], projectType: "mixed", projectName: "p" }, FIXED);
     writeFileSync(
       join(dir, "brain-dump", "inbox.md"),
       "- [2026-06-10 08:00] waiting a\n- [2026-06-12 08:00] waiting b\n",

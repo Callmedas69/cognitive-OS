@@ -48,7 +48,7 @@ describe("backupAndWrite", () => {
 });
 
 const ans = (over: Partial<InitAnswers> = {}): InitAnswers => ({
-  agents: "all",
+  agents: ["claude-code", "codex", "cursor", "antigravity"],
   projectType: "fullstack",
   projectName: "my-dapp",
   ...over,
@@ -59,7 +59,7 @@ const MARKER = "cognitiveos start --hook";
 
 describe("wireSessionHooks", () => {
   it("claude-code → creates .claude/settings.json with a SessionStart hook", () => {
-    const res = wireSessionHooks(dir, ans({ agents: "claude-code" }));
+    const res = wireSessionHooks(dir, ans({ agents: ["claude-code"] }));
     const cfg = JSON.parse(readFileSync(CLAUDE_CFG(), "utf8"));
     expect(JSON.stringify(cfg)).toContain(MARKER);
     expect(cfg.hooks.SessionStart[0].hooks[0].command).toContain("--agent=claude");
@@ -67,13 +67,13 @@ describe("wireSessionHooks", () => {
   });
 
   it("antigravity → creates .agents/hooks.json with PreInvocation", () => {
-    wireSessionHooks(dir, ans({ agents: "antigravity" }));
+    wireSessionHooks(dir, ans({ agents: ["antigravity"] }));
     const cfg = JSON.parse(readFileSync(AGY_CFG(), "utf8"));
     expect(cfg["cognitiveos-session"].PreInvocation[0].command).toContain("--agent=antigravity");
   });
 
   it("all → wires both; codex/cursor wire neither", () => {
-    wireSessionHooks(dir, ans({ agents: "all" }));
+    wireSessionHooks(dir, ans({ agents: ["claude-code", "codex", "cursor", "antigravity"] }));
     expect(readFileSync(CLAUDE_CFG(), "utf8")).toContain(MARKER);
     expect(readFileSync(AGY_CFG(), "utf8")).toContain(MARKER);
   });
@@ -84,7 +84,7 @@ describe("wireSessionHooks", () => {
       CLAUDE_CFG(),
       JSON.stringify({ permissions: { allow: ["x"] }, hooks: { SessionStart: [] } }),
     );
-    wireSessionHooks(dir, ans({ agents: "claude-code" }));
+    wireSessionHooks(dir, ans({ agents: ["claude-code"] }));
     const cfg = JSON.parse(readFileSync(CLAUDE_CFG(), "utf8"));
     expect(cfg.permissions.allow).toEqual(["x"]);
     expect(JSON.stringify(cfg)).toContain(MARKER);
@@ -92,8 +92,8 @@ describe("wireSessionHooks", () => {
   });
 
   it("idempotent — second run adds no duplicate", () => {
-    wireSessionHooks(dir, ans({ agents: "claude-code" }));
-    wireSessionHooks(dir, ans({ agents: "claude-code" }));
+    wireSessionHooks(dir, ans({ agents: ["claude-code"] }));
+    wireSessionHooks(dir, ans({ agents: ["claude-code"] }));
     const cfg = JSON.parse(readFileSync(CLAUDE_CFG(), "utf8"));
     expect(cfg.hooks.SessionStart.length).toBe(1);
   });
@@ -106,7 +106,7 @@ describe("wireSessionHooks", () => {
       CLAUDE_CFG(),
       JSON.stringify({ description: "remember to run cognitiveos start --hook docs", hooks: { SessionStart: [] } }),
     );
-    wireSessionHooks(dir, ans({ agents: "claude-code" }));
+    wireSessionHooks(dir, ans({ agents: ["claude-code"] }));
     const cfg = JSON.parse(readFileSync(CLAUDE_CFG(), "utf8"));
     expect(cfg.hooks.SessionStart.length).toBe(1);
     expect(cfg.hooks.SessionStart[0].hooks[0].command).toContain(MARKER);
@@ -116,7 +116,7 @@ describe("wireSessionHooks", () => {
     mkdirSync(join(dir, ".claude"), { recursive: true });
     const original = JSON.stringify({ hooks: { SessionStart: { type: "command", command: "other" } } });
     writeFileSync(CLAUDE_CFG(), original);
-    const res = wireSessionHooks(dir, ans({ agents: "claude-code" }));
+    const res = wireSessionHooks(dir, ans({ agents: ["claude-code"] }));
     expect(res.manual.some((m) => m.file.includes(".claude/settings.json"))).toBe(true);
     expect(readFileSync(CLAUDE_CFG(), "utf8")).toBe(original);
   });
@@ -124,7 +124,7 @@ describe("wireSessionHooks", () => {
   it("malformed existing config → not written, reported as manual", () => {
     mkdirSync(join(dir, ".claude"), { recursive: true });
     writeFileSync(CLAUDE_CFG(), "{ broken");
-    const res = wireSessionHooks(dir, ans({ agents: "claude-code" }));
+    const res = wireSessionHooks(dir, ans({ agents: ["claude-code"] }));
     expect(readFileSync(CLAUDE_CFG(), "utf8")).toBe("{ broken");
     expect(res.manual.some((m) => m.file.includes(".claude/settings.json"))).toBe(true);
   });

@@ -12,18 +12,15 @@ export type ProjectType =
   | "mobile-app"
   | "mixed";
 
-export type AgentChoice =
-  | "claude-code"
-  | "codex"
-  | "cursor"
-  | "antigravity"
-  | "all";
+/** A single agent the user can target. Selection is now a list of these. */
+export type AgentId = "claude-code" | "codex" | "cursor" | "antigravity";
 
 /** Agents with a confirmed injecting session hook. */
 export type HookAgent = "claude" | "antigravity";
 
 export interface InitAnswers {
-  agents: AgentChoice;
+  /** Which agents to scaffold for — one or more, never empty. */
+  agents: AgentId[];
   projectType: ProjectType;
   projectName: string;
 }

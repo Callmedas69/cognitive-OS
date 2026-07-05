@@ -80,7 +80,7 @@ describe("init generates the keeper (Claude Code only)", () => {
 
   const KEEPER = () => join(dir, ".claude", "agents", "cognitiveos-keeper.md");
   const answers = (over: Partial<InitAnswers> = {}): InitAnswers => ({
-    agents: "claude-code",
+    agents: ["claude-code"],
     projectType: "mixed",
     projectName: "p",
     ...over,
@@ -92,12 +92,12 @@ describe("init generates the keeper (Claude Code only)", () => {
   });
 
   it("all → keeper written", () => {
-    runInit(dir, answers({ agents: "all" }));
+    runInit(dir, answers({ agents: ["claude-code", "codex", "cursor", "antigravity"] }));
     expect(existsSync(KEEPER())).toBe(true);
   });
 
   it("codex → no .claude, no keeper", () => {
-    runInit(dir, answers({ agents: "codex" }));
+    runInit(dir, answers({ agents: ["codex"] }));
     expect(existsSync(KEEPER())).toBe(false);
   });
 });
@@ -106,7 +106,7 @@ describe("check — setup soft warn", () => {
   let dir: string;
   beforeEach(() => {
     dir = mkdtempSync(join(tmpdir(), "cogsetup-"));
-    const a: InitAnswers = { agents: "claude-code", projectType: "mixed", projectName: "p" };
+    const a: InitAnswers = { agents: ["claude-code"], projectType: "mixed", projectName: "p" };
     runInit(dir, a);
     wireSessionHooks(dir, a); // full install so only `setup` is a (soft) flag
   });

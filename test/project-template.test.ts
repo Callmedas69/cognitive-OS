@@ -14,7 +14,7 @@ afterEach(() => {
 });
 
 const base = (over: Partial<InitAnswers> = {}): InitAnswers => ({
-  agents: "claude-code",
+  agents: ["claude-code"],
   projectType: "blockchain",
   projectName: "my-dapp",
   ...over,

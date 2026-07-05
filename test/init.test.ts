@@ -15,7 +15,7 @@ afterEach(() => {
 });
 
 const answers = (over: Partial<InitAnswers> = {}): InitAnswers => ({
-  agents: "claude-code",
+  agents: ["claude-code"],
   projectType: "blockchain",
   projectName: "my-dapp",
   ...over,
@@ -57,7 +57,7 @@ describe("runInit — fresh dir produces the complete structure", () => {
   });
 
   it("codex selection writes AGENTS.md and no Claude hooks", () => {
-    runInit(dir, answers({ agents: "codex" }));
+    runInit(dir, answers({ agents: ["codex"] }));
     expect(existsSync(join(dir, "AGENTS.md"))).toBe(true);
     expect(existsSync(join(dir, "CLAUDE.md"))).toBe(false);
     expect(existsSync(join(dir, ".claude"))).toBe(false);
@@ -90,7 +90,7 @@ describe("runInit — worktree (never overwrite)", () => {
 describe("initCommand — wires the session hook", () => {
   it("creates .claude/settings.json with the SessionStart hook for agents=all", async () => {
     const fakePrompt = async () => ({
-      agents: "all",
+      agents: ["claude-code", "codex", "cursor", "antigravity"],
       projectType: "fullstack",
       projectName: "demo",
     });

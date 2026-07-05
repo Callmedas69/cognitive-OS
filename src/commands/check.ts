@@ -9,7 +9,7 @@ import { ZONE_CONTEXTS } from "../templates/contexts/index.js";
 import { wireSessionHooks, claudeStopWired } from "../generators/session-hook.js";
 import { LOOP_MARKER } from "../templates/loop-block.js";
 import { SETUP_SENTINEL } from "../templates/first-run-block.js";
-import type { AgentChoice } from "../types.js";
+import type { AgentId } from "../types.js";
 
 export interface CheckResult {
   label: string;
@@ -334,12 +334,15 @@ export function runFix(targetDir: string): string[] {
   }
 
   // restore missing session hooks for installed agent skills (idempotent)
-  const claudeSkill = existsSync(join(targetDir, ".claude", "skills", "cognitiveos", "SKILL.md"));
-  const agySkill = existsSync(join(targetDir, ".agents", "skills", "cognitiveos", "SKILL.md"));
-  const choice: AgentChoice | null =
-    claudeSkill && agySkill ? "all" : claudeSkill ? "claude-code" : agySkill ? "antigravity" : null;
-  if (choice) {
-    const res = wireSessionHooks(targetDir, { agents: choice, projectType: "mixed", projectName: "project" });
+  const detected: AgentId[] = [];
+  if (existsSync(join(targetDir, ".claude", "skills", "cognitiveos", "SKILL.md"))) {
+    detected.push("claude-code");
+  }
+  if (existsSync(join(targetDir, ".agents", "skills", "cognitiveos", "SKILL.md"))) {
+    detected.push("antigravity");
+  }
+  if (detected.length > 0) {
+    const res = wireSessionHooks(targetDir, { agents: detected, projectType: "mixed", projectName: "project" });
     for (const w of res.wired) fixed.push(`${w} (session hook ensured)`);
   }
 

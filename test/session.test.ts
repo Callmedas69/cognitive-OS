@@ -45,7 +45,7 @@ describe("generateFirstSession", () => {
 
   it("is included in runInit — sessions/ materializes after full init", () => {
     const answers: InitAnswers = {
-      agents: "claude-code",
+      agents: ["claude-code"],
       projectType: "fullstack",
       projectName: "p",
     };

@@ -1,5 +1,5 @@
-import { intro, outro, select, text, confirm, note, log, isCancel, cancel } from "@clack/prompts";
-import type { AgentChoice, InitAnswers, ProjectType } from "../types.js";
+import { intro, outro, select, multiselect, text, confirm, note, log, isCancel, cancel } from "@clack/prompts";
+import type { AgentId, InitAnswers, ProjectType } from "../types.js";
 import { atomicGenerate, type GenerateResult } from "../lib/fs-utils.js";
 import { detectInstall, decideInitAction } from "../lib/detect.js";
 import { generateZones } from "../generators/zones.js";
@@ -18,7 +18,7 @@ import { renderWordmark, brandLine, emerald, coral, muted } from "../lib/theme.j
 export type PromptFn = (questions: unknown) => Promise<RawAnswers>;
 
 export interface RawAnswers {
-  agents: AgentChoice;
+  agents: AgentId[];
   projectType: ProjectType;
   projectName: string;
 }
@@ -46,15 +46,15 @@ export function validateProjectName(v: string | undefined): string | undefined {
 export function buildQuestions() {
   return [
     {
-      type: "list",
+      // Multi-select: tick every agent you use. Defaults to all ticked.
+      type: "multiselect",
       name: "agents",
-      message: "[1/3] Which AI agent(s) do you use?",
+      message: "[1/3] Which AI agent(s) do you use? (space toggles, enter accepts)",
       choices: [
         { name: "Claude Code", value: "claude-code" },
         { name: "Codex CLI", value: "codex" },
         { name: "Cursor", value: "cursor" },
         { name: "Antigravity", value: "antigravity" },
-        { name: "All", value: "all" },
       ],
     },
     {
@@ -110,12 +110,15 @@ function bailIfCancelled(value: unknown): void {
 async function clackPrompt(_questions?: unknown): Promise<RawAnswers> {
   const q = buildQuestions();
 
-  const agents = await select({
+  const agents = await multiselect({
     message: q[0].message,
     options: (q[0].choices as { name: string; value: string }[]).map((c) => ({
       value: c.value,
       label: c.name,
     })),
+    // Default: every agent ticked — one Enter reproduces the old "All".
+    initialValues: (q[0].choices as { value: string }[]).map((c) => c.value),
+    required: true,
   });
   bailIfCancelled(agents);
 
@@ -136,7 +139,7 @@ async function clackPrompt(_questions?: unknown): Promise<RawAnswers> {
   bailIfCancelled(projectName);
 
   return {
-    agents: agents as AgentChoice,
+    agents: agents as AgentId[],
     projectType: projectType as ProjectType,
     projectName: projectName as string,
   };
@@ -148,29 +151,24 @@ export async function runWizard(prompt: PromptFn = clackPrompt): Promise<InitAns
   return normalizeAnswers(raw);
 }
 
-/** Claude Code hooks ship for the Claude Code and "all" selections. */
-function wantsClaudeHooks(agents: AgentChoice): boolean {
-  return agents === "claude-code" || agents === "all";
+/** Claude Code hooks ship whenever Claude Code is among the selected agents. */
+function wantsClaudeHooks(agents: AgentId[]): boolean {
+  return agents.includes("claude-code");
 }
 
 /**
- * Map the wizard's AgentChoice to the global skill installer's InstallAgent.
- * Cursor has no SKILL.md home target (it uses the project .mdc rule), so it
- * returns null — the caller skips the global-skill offer for cursor.
+ * Map selected agents to the global skill installer's per-agent InstallAgent
+ * targets. Cursor has no SKILL.md home target (it uses the project .mdc rule),
+ * so it is dropped — a cursor-only selection yields an empty list.
  */
-export function toInstallAgent(agents: AgentChoice): InstallAgent | null {
-  switch (agents) {
-    case "claude-code":
-      return "claude";
-    case "codex":
-      return "codex";
-    case "antigravity":
-      return "antigravity";
-    case "all":
-      return "all"; // claude + codex + antigravity (cursor has no global target)
-    case "cursor":
-      return null;
-  }
+export function toInstallAgents(agents: AgentId[]): InstallAgent[] {
+  const map: Partial<Record<AgentId, InstallAgent>> = {
+    "claude-code": "claude",
+    codex: "codex",
+    antigravity: "antigravity",
+    // cursor: intentionally omitted — no global skill target.
+  };
+  return agents.map((a) => map[a]).filter((x): x is InstallAgent => x !== undefined);
 }
 
 /**
@@ -179,12 +177,12 @@ export function toInstallAgent(agents: AgentChoice): InstallAgent | null {
  * so tests drive it without a TTY or touching the real home dir.
  */
 export async function offerSkillInstall(
-  agents: AgentChoice,
+  agents: AgentId[],
   confirmFn: () => Promise<boolean>,
   homeDir?: string,
 ): Promise<void> {
-  const installAgent = toInstallAgent(agents);
-  if (installAgent === null) {
+  const installAgents = toInstallAgents(agents);
+  if (installAgents.length === 0) {
     note(
       "Cursor uses the project rule (.cursor/rules/cognitiveos.mdc) — no global skill needed.",
       "skill",
@@ -201,10 +199,14 @@ export async function offerSkillInstall(
     return;
   }
 
-  const res = installSkill(installAgent, homeDir);
-  for (const b of res.backedUp) log.warn(coral(`Backed up existing skill → ${b}`));
-  if (res.written.length > 0) {
-    log.success(`Installed /cognitiveos skill: ${res.written.join(", ")}`);
+  const written: string[] = [];
+  for (const installAgent of installAgents) {
+    const res = installSkill(installAgent, homeDir);
+    for (const b of res.backedUp) log.warn(coral(`Backed up existing skill → ${b}`));
+    written.push(...res.written);
+  }
+  if (written.length > 0) {
+    log.success(`Installed /cognitiveos skill: ${written.join(", ")}`);
     note("Restart your agent, then type /cognitiveos.", "skill");
   } else {
     log.info("cognitiveOS skill already up to date.");

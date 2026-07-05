@@ -2,19 +2,21 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { existsSync, mkdtempSync, readdirSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { toInstallAgent, offerSkillInstall } from "../src/commands/init.js";
-import type { AgentChoice } from "../src/types.js";
+import { toInstallAgents, offerSkillInstall } from "../src/commands/init.js";
 
-describe("toInstallAgent", () => {
-  it("maps each wizard AgentChoice to the installer's InstallAgent", () => {
-    expect(toInstallAgent("claude-code")).toBe("claude");
-    expect(toInstallAgent("codex")).toBe("codex");
-    expect(toInstallAgent("antigravity")).toBe("antigravity");
-    expect(toInstallAgent("all")).toBe("all");
+describe("toInstallAgents", () => {
+  it("maps selected agents to their installer targets", () => {
+    expect(toInstallAgents(["claude-code"])).toEqual(["claude"]);
+    expect(toInstallAgents(["claude-code", "codex", "antigravity"])).toEqual([
+      "claude",
+      "codex",
+      "antigravity",
+    ]);
   });
 
-  it("cursor has no global skill target → null", () => {
-    expect(toInstallAgent("cursor")).toBeNull();
+  it("drops cursor — cursor-only selection yields an empty list", () => {
+    expect(toInstallAgents(["cursor"])).toEqual([]);
+    expect(toInstallAgents(["claude-code", "cursor"])).toEqual(["claude"]);
   });
 });
 
@@ -29,26 +31,30 @@ describe("offerSkillInstall", () => {
     join(home, agentDir, "skills", "cognitiveos", "SKILL.md");
 
   it("confirm=true → writes the skill to the mapped home dir", async () => {
-    await offerSkillInstall("claude-code", async () => true, home);
+    await offerSkillInstall(["claude-code"], async () => true, home);
     expect(existsSync(SKILL(".claude"))).toBe(true);
   });
 
-  it("confirm=true for 'all' → writes claude + codex + antigravity", async () => {
-    await offerSkillInstall("all", async () => true, home);
+  it("confirm=true for all four → writes claude + codex + antigravity", async () => {
+    await offerSkillInstall(
+      ["claude-code", "codex", "cursor", "antigravity"],
+      async () => true,
+      home,
+    );
     expect(existsSync(SKILL(".claude"))).toBe(true);
     expect(existsSync(SKILL(".codex"))).toBe(true);
     expect(existsSync(SKILL(".agents"))).toBe(true);
   });
 
   it("confirm=false → nothing written under home", async () => {
-    await offerSkillInstall("claude-code", async () => false, home);
+    await offerSkillInstall(["claude-code"], async () => false, home);
     expect(existsSync(join(home, ".claude"))).toBe(false);
   });
 
-  it("cursor → confirm never called, nothing written", async () => {
+  it("cursor-only → confirm never called, nothing written", async () => {
     let asked = false;
     await offerSkillInstall(
-      "cursor",
+      ["cursor"],
       async () => {
         asked = true;
         return true;

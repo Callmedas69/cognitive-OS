@@ -22,7 +22,7 @@ afterEach(() => {
 });
 
 const base = (over: Partial<InitAnswers> = {}): InitAnswers => ({
-  agents: "claude-code",
+  agents: ["claude-code"],
   projectType: "fullstack",
   projectName: "my-dapp",
   ...over,
@@ -39,19 +39,19 @@ describe("generateState", () => {
 
 describe("generateSkillFiles", () => {
   it("claude-code → only CLAUDE.md", () => {
-    generateSkillFiles(dir, base({ agents: "claude-code" }));
+    generateSkillFiles(dir, base({ agents: ["claude-code"] }));
     expect(existsSync(join(dir, "CLAUDE.md"))).toBe(true);
     expect(existsSync(join(dir, "AGENTS.md"))).toBe(false);
   });
 
   it("codex → only AGENTS.md", () => {
-    generateSkillFiles(dir, base({ agents: "codex" }));
+    generateSkillFiles(dir, base({ agents: ["codex"] }));
     expect(existsSync(join(dir, "AGENTS.md"))).toBe(true);
     expect(existsSync(join(dir, "CLAUDE.md"))).toBe(false);
   });
 
   it("all → both, byte-identical content", () => {
-    generateSkillFiles(dir, base({ agents: "all" }));
+    generateSkillFiles(dir, base({ agents: ["claude-code", "codex", "cursor", "antigravity"] }));
     const claude = readFileSync(join(dir, "CLAUDE.md"), "utf8");
     const agents = readFileSync(join(dir, "AGENTS.md"), "utf8");
     expect(claude).toBe(agents);
@@ -59,14 +59,14 @@ describe("generateSkillFiles", () => {
   });
 
   it("embeds the agentic loop block in both skill files", () => {
-    generateSkillFiles(dir, base({ agents: "all" }));
+    generateSkillFiles(dir, base({ agents: ["claude-code", "codex", "cursor", "antigravity"] }));
     for (const f of ["CLAUDE.md", "AGENTS.md"]) {
       expect(readFileSync(join(dir, f), "utf8")).toContain("## How To Work Here");
     }
   });
 
   it("includes the canonical claude-map sections (folder tree + what to avoid)", () => {
-    generateSkillFiles(dir, base({ agents: "claude-code" }));
+    generateSkillFiles(dir, base({ agents: ["claude-code"] }));
     const md = readFileSync(join(dir, "CLAUDE.md"), "utf8");
     expect(md).toContain("## Folder Structure");
     expect(md).toContain("## What to Avoid");
@@ -84,7 +84,7 @@ describe("generateHooks", () => {
 
 describe("generateAgentSkill", () => {
   it("claude-code → .claude/skills/cognitiveos/SKILL.md with frontmatter + project", () => {
-    generateAgentSkill(dir, base({ agents: "claude-code" }));
+    generateAgentSkill(dir, base({ agents: ["claude-code"] }));
     const skill = readFileSync(join(dir, CLAUDE_SKILL), "utf8");
     expect(skill).toMatch(/^---\nname: cognitiveos\ndescription: /);
     expect(skill).toContain("my-dapp");
@@ -94,20 +94,20 @@ describe("generateAgentSkill", () => {
   });
 
   it("codex → .codex/skills/cognitiveos/SKILL.md only", () => {
-    generateAgentSkill(dir, base({ agents: "codex" }));
+    generateAgentSkill(dir, base({ agents: ["codex"] }));
     expect(existsSync(join(dir, CODEX_SKILL))).toBe(true);
     expect(existsSync(join(dir, CLAUDE_SKILL))).toBe(false);
   });
 
   it("antigravity → .agents/skills/cognitiveos/SKILL.md only", () => {
-    generateAgentSkill(dir, base({ agents: "antigravity" }));
+    generateAgentSkill(dir, base({ agents: ["antigravity"] }));
     expect(existsSync(join(dir, ANTIGRAVITY_SKILL))).toBe(true);
     expect(existsSync(join(dir, CLAUDE_SKILL))).toBe(false);
     expect(existsSync(join(dir, CURSOR_RULE))).toBe(false);
   });
 
   it("cursor → .cursor/rules/cognitiveos.mdc with alwaysApply", () => {
-    generateAgentSkill(dir, base({ agents: "cursor" }));
+    generateAgentSkill(dir, base({ agents: ["cursor"] }));
     const rule = readFileSync(join(dir, CURSOR_RULE), "utf8");
     expect(rule).toContain("alwaysApply: true");
     expect(rule).toContain("my-dapp");
@@ -115,7 +115,7 @@ describe("generateAgentSkill", () => {
   });
 
   it("all → SKILL.md for claude+codex+antigravity (identical) + cursor .mdc", () => {
-    generateAgentSkill(dir, base({ agents: "all" }));
+    generateAgentSkill(dir, base({ agents: ["claude-code", "codex", "cursor", "antigravity"] }));
     const claude = readFileSync(join(dir, CLAUDE_SKILL), "utf8");
     const codex = readFileSync(join(dir, CODEX_SKILL), "utf8");
     const agy = readFileSync(join(dir, ANTIGRAVITY_SKILL), "utf8");
@@ -125,14 +125,14 @@ describe("generateAgentSkill", () => {
   });
 
   it("re-run never overwrites (idempotent)", () => {
-    generateAgentSkill(dir, base({ agents: "claude-code" }));
+    generateAgentSkill(dir, base({ agents: ["claude-code"] }));
     const first = readFileSync(join(dir, CLAUDE_SKILL), "utf8");
-    generateAgentSkill(dir, base({ agents: "claude-code", projectName: "different" }));
+    generateAgentSkill(dir, base({ agents: ["claude-code"], projectName: "different" }));
     expect(readFileSync(join(dir, CLAUDE_SKILL), "utf8")).toBe(first);
   });
 
   it("embeds the agentic loop block in the SKILL.md operating manual", () => {
-    generateAgentSkill(dir, base({ agents: "claude-code" }));
+    generateAgentSkill(dir, base({ agents: ["claude-code"] }));
     expect(readFileSync(join(dir, CLAUDE_SKILL), "utf8")).toContain("## How To Work Here");
   });
 });
