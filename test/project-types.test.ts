@@ -2,9 +2,20 @@ import { describe, it, expect } from "vitest";
 import { PROJECT_TEMPLATES } from "../src/templates/project-types/index.js";
 
 describe("project-type templates (PRD 5.2)", () => {
-  it("covers all 6 project types", () => {
+  it("covers all 10 project types", () => {
     expect(Object.keys(PROJECT_TEMPLATES).sort()).toEqual(
-      ["blockchain", "cli-tool", "client-work", "content", "fullstack", "mixed"].sort()
+      [
+        "blockchain",
+        "cli-tool",
+        "client-work",
+        "content",
+        "fullstack",
+        "video-production",
+        "research",
+        "learning",
+        "mobile-app",
+        "mixed",
+      ].sort()
     );
   });
 
@@ -40,6 +51,10 @@ describe("project-type templates (PRD 5.2)", () => {
       "cli-tool": ["spec", "core", "cli", "docs"],
       content: ["research", "drafts", "review", "published"],
       "client-work": ["intake", "proposal", "delivery", "wrap-up"],
+      "video-production": ["concept", "script", "assets", "edit", "published"],
+      research: ["sources", "notes", "synthesis", "draft"],
+      learning: ["syllabus", "practice", "project", "log"],
+      "mobile-app": ["design", "build", "test", "release"],
     } as const;
     for (const [type, stages] of Object.entries(expected)) {
       const { folders } = PROJECT_TEMPLATES[type as keyof typeof expected];
@@ -60,6 +75,16 @@ describe("project-type templates (PRD 5.2)", () => {
     expect(ctx("client-work", "proposal")).toContain("out-of-scope");
     expect(ctx("client-work", "delivery")).toContain("scope change");
     expect(ctx("client-work", "wrap-up")).toContain("invoice");
+  });
+
+  it("new verticals carry stage-specific guidance", () => {
+    const ctx = (t: "video-production" | "research" | "learning" | "mobile-app", p: string) =>
+      PROJECT_TEMPLATES[t].folders.find((f) => f.path === p)!.context;
+    expect(ctx("video-production", "assets")).toContain("HyperFrames");
+    expect(ctx("video-production", "concept")).toContain("one message");
+    expect(ctx("research", "synthesis")).toContain("thesis");
+    expect(ctx("learning", "project")).toContain("ship a tiny artifact");
+    expect(ctx("mobile-app", "test")).toContain("real device");
   });
 
   it("client-work carries the no-bleed rule (one project = one engagement)", () => {

@@ -4,6 +4,10 @@ import { fullstackTemplate } from "./fullstack.js";
 import { cliToolTemplate } from "./cli-tool.js";
 import { contentTemplate } from "./content.js";
 import { clientWorkTemplate } from "./client-work.js";
+import { videoProductionTemplate } from "./video-production.js";
+import { researchTemplate } from "./research.js";
+import { learningTemplate } from "./learning.js";
+import { mobileAppTemplate } from "./mobile-app.js";
 import { minimalTemplate } from "./minimal.js";
 
 // Project-type → folder template (PRD 5.2 / 7.4 Q2).
@@ -15,5 +19,9 @@ export const PROJECT_TEMPLATES: Record<ProjectType, ProjectTemplate> = {
   "cli-tool": cliToolTemplate,
   content: contentTemplate,
   "client-work": clientWorkTemplate,
+  "video-production": videoProductionTemplate,
+  research: researchTemplate,
+  learning: learningTemplate,
+  "mobile-app": mobileAppTemplate,
   mixed: minimalTemplate,
 };

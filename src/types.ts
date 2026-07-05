@@ -6,6 +6,10 @@ export type ProjectType =
   | "cli-tool"
   | "content"
   | "client-work"
+  | "video-production"
+  | "research"
+  | "learning"
+  | "mobile-app"
   | "mixed";
 
 export type AgentChoice =
