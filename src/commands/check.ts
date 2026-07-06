@@ -21,7 +21,7 @@ export interface CheckResult {
 
 const ZONES = ["brain-dump", "queue", "focus", "projects", "ideas", "someday"];
 const HOOKS = ["start-session", "end-session", "dump"];
-const ROUTING_MARKER = "| Zone | Folder | Purpose |";
+const ROUTING_MARKER = "| Task | Zone | Files to Read | Tools | Avoid |";
 const STATE_SECTIONS = 7;
 // Soft growth flag: STATE.md is a snapshot, not a log. Past this it's drifting
 // back into an append-log — warn, but don't fail (nothing is broken).

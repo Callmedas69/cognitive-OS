@@ -25,6 +25,7 @@ export function generateSkillFiles(targetDir: string, answers: InitAnswers): voi
   const content = renderSkillFile({
     projectName: answers.projectName,
     projectType: answers.projectType,
+    agents: answers.agents,
   });
   for (const file of skillFilesFor(answers.agents)) {
     safeWrite(join(targetDir, file), content);

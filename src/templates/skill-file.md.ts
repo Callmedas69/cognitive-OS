@@ -1,9 +1,12 @@
-import type { ProjectType } from "../types.js";
+import type { AgentId, ProjectType } from "../types.js";
 import { LOOP_BLOCK } from "./loop-block.js";
+import { PROJECT_TEMPLATES } from "./project-types/index.js";
 
 export interface SkillFileVars {
   projectName: string;
   projectType: ProjectType;
+  /** Agents scaffolded for — drives the agent-config line in the tree. Defaults to all four. */
+  agents?: AgentId[];
 }
 
 // 5-stage ICM map for the blockchain vertical (PRD 5.2).
@@ -21,11 +24,62 @@ function blockchainStages(name: string): string {
 `;
 }
 
+const AGENT_DIRS: Record<AgentId, string> = {
+  "claude-code": ".claude/",
+  codex: ".codex/",
+  cursor: ".cursor/",
+  antigravity: ".agents/",
+};
+
+/** The `projects/[name]/` subtree — a compact stage line (from the project type) + CONTEXT.md. */
+function projectSubtree(name: string, type: ProjectType): string {
+  const folders = PROJECT_TEMPLATES[type].folders;
+  const label = type === "mixed" ? "" : ` (${type})`;
+  const lines = [
+    `│   └── ${name}/             <- active project${label}`,
+  ];
+  if (folders.length > 0) {
+    const stages = folders.map((f) => `${f.path}/`).join("  ");
+    lines.push(`│       ├── ${stages}   <- stages (each has CONTEXT.md)`);
+  }
+  lines.push(`│       └── CONTEXT.md`);
+  return lines.join("\n");
+}
+
+/** Annotated folder tree (RT-01/02) — every node labelled, project subtree from the type. */
+function folderTree(name: string, type: ProjectType, agents: AgentId[]): string {
+  const agentDirs = agents.map((a) => AGENT_DIRS[a]).join(" ");
+  return `./
+├── CLAUDE.md / AGENTS.md    <- this map (identical twins; \`check --fix\` repairs drift)
+├── STATE.md                 <- current state, read FIRST (7 sections, never restructure)
+├── brain-dump/              <- capture: every thought lands here first, no filter
+│   └── inbox.md             <- one line per capture, timestamped
+├── queue/                   <- triage: sorted by urgency x energy x dopamine
+│   └── sorted.md            <- prioritized backlog, smallest next action first
+├── focus/                   <- the ONE thing right now
+│   ├── current-task.md      <- exactly 0 or 1 task, carries a "Done when"
+│   └── session-notes.md     <- working notes for the current task
+├── projects/                <- max 3 active, one subfolder per project
+${projectSubtree(name, type)}
+├── ideas/                   <- captured, not committed
+│   └── ideas.md
+├── someday/                 <- not now, not never (review monthly)
+│   └── someday.md
+├── sessions/                <- append-only logs, one file per day (YYYY-MM-DD.md), never edit
+└── ${agentDirs}   <- agent config: skill, hooks, keeper, commands
+
+Every zone folder has its own CONTEXT.md — read it before acting in that zone.`;
+}
+
 /**
  * Generates the identical content shared by CLAUDE.md and AGENTS.md (PRD 5.7).
  * Injects the active project from init Q3; blockchain type appends the 5-stage map.
  */
-export function renderSkillFile({ projectName, projectType }: SkillFileVars): string {
+export function renderSkillFile({
+  projectName,
+  projectType,
+  agents = ["claude-code", "codex", "cursor", "antigravity"],
+}: SkillFileVars): string {
   const blockchainBlock =
     projectType === "blockchain" ? blockchainStages(projectName) : "";
 
@@ -40,25 +94,22 @@ Full session workflow: the **cognitiveos** skill (auto-loaded by your agent).
 ## Folder Structure
 
 \`\`\`
-./
-├── CLAUDE.md / AGENTS.md   ← this map (identical twins)
-├── STATE.md                ← current state — read first
-├── brain-dump/  queue/  focus/  projects/  ideas/  someday/   ← zones (each has CONTEXT.md)
-└── sessions/               ← append-only history
+${folderTree(projectName, projectType, agents)}
 \`\`\`
 
-## Zone Map
-Each folder has a CONTEXT.md. Read it before acting in that zone.
+## Routing Table
 
-| Zone | Folder | Purpose |
-|------|--------|---------|
-| Capture | brain-dump/ | Everything goes here first. No filter. |
-| Triage | queue/ | Sorted by urgency × energy × dopamine |
-| Focus | focus/ | The ONE thing right now. Enforce current-task.md = 1 task. |
-| Projects | projects/ | Max 3 active. One subfolder per project. |
-| Ideas | ideas/ | Captured, not committed. |
-| Someday | someday/ | Not now, not never. |
-| History | sessions/ | Append-only session logs. Never edit. |
+| Task | Zone | Files to Read | Tools | Avoid |
+|------|------|---------------|-------|-------|
+| Capture a thought | brain-dump/ | nothing — just append | \`cognitiveos dump "..."\` | Triage, judgment, questions |
+| Triage the inbox | queue/ | brain-dump/inbox.md, queue/sorted.md, STATE.md | — | Starting work; showing >3 items |
+| Do the work | focus/ | focus/current-task.md, focus/CONTEXT.md, project files | \`cognitiveos start\` | A 2nd task; browsing queue/ mid-task |
+| Run a project | projects/ | projects/CONTEXT.md, projects/[name]/CONTEXT.md | — | A 4th active project; loose files |
+| Park an idea | ideas/ | ideas/ideas.md | — | Committing, task pressure |
+| Defer without guilt | someday/ | someday/someday.md | — | Daily review (monthly only) |
+| Start a session | ./ | STATE.md | \`cognitiveos start\`, SessionStart hook | Acting before reading STATE.md |
+| End a session | sessions/ | STATE.md | \`/end-session\`, keeper agent | Editing past logs |
+| Health check | ./ | — | \`cognitiveos check --fix\` | Hand-editing CLAUDE.md/AGENTS.md drift |
 
 ## Naming Conventions
 - Files and folders: lowercase, hyphens, no spaces or symbols (\`my-project\`, not \`My Project\`).

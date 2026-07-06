@@ -11,12 +11,33 @@ describe("renderSkillFile", () => {
   it("includes the zone routing table and ADHD rules (PRD 5.7)", () => {
     const md = renderSkillFile({ projectName: "x", projectType: "cli-tool" });
     expect(md).toContain("# cognitiveOS — Project Map & Routing Table");
-    expect(md).toContain("| Zone | Folder | Purpose |");
+    expect(md).toContain("| Task | Zone | Files to Read | Tools | Avoid |");
     for (const folder of ["brain-dump/", "queue/", "focus/", "projects/", "ideas/", "someday/", "sessions/"]) {
       expect(md).toContain(folder);
     }
     expect(md).toContain("## ADHD Rules (non-negotiable)");
     expect(md).toContain("current-task.md holds ONE task only");
+  });
+
+  it("renders an annotated folder tree with seed files (RT-01)", () => {
+    const md = renderSkillFile({ projectName: "x", projectType: "cli-tool" });
+    for (const seed of ["inbox.md", "sorted.md", "current-task.md", "session-notes.md", "ideas.md", "someday.md"]) {
+      expect(md).toContain(seed);
+    }
+  });
+
+  it("renders the project stage subtree from the project type (RT-02)", () => {
+    const fullstack = renderSkillFile({ projectName: "p", projectType: "fullstack" });
+    expect(fullstack).toContain("design/  api/  frontend/  infra/");
+
+    const minimal = renderSkillFile({ projectName: "p", projectType: "mixed" });
+    expect(minimal).not.toContain("<- stages");
+  });
+
+  it("lists only the agent dirs actually selected", () => {
+    const claudeOnly = renderSkillFile({ projectName: "p", projectType: "mixed", agents: ["claude-code"] });
+    expect(claudeOnly).toContain(".claude/   <- agent config");
+    expect(claudeOnly).not.toContain(".codex/");
   });
 
   it("documents naming conventions (smoke test #3)", () => {
