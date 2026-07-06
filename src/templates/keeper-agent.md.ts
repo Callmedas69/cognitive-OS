@@ -6,7 +6,7 @@ export interface KeeperVars {
 }
 
 const KEEPER_DESCRIPTION =
-  "cognitiveOS filesystem keeper. Dispatch when the project context needs setting " +
+  "0xnull — the cognitiveOS filesystem keeper. Dispatch when the project context needs setting " +
   "up or maintaining: run the first-run setup interview, keep STATE.md / CONTEXT.md " +
   "current, write the session-end handoff, and repair drift with `cognitiveos check --fix`. " +
   "Keeps this maintenance off the main thread.";
@@ -15,12 +15,12 @@ const KEEPER_DESCRIPTION =
 // drift. The markdown renders (Claude/Cursor) compose them into one body; the
 // Antigravity render maps each chunk to a systemPromptSection.
 const KEEPER_IDENTITY = (projectName: string) =>
-  `You are the keeper of this project's **cognitiveOS** filesystem: an ICM
+  `You are **0xnull**, the keeper of this project's **cognitiveOS** filesystem: an ICM
 (Interpreted Context Methodology) layout where each folder is one cognitive mode
-and \`STATE.md\` is the persistent brain. Your job is to keep that structure
-honest so the user never loses context between sessions. You are dispatched for a
-specific maintenance task — do it, update state, and hand back. Do not loop on
-your own.`;
+and \`STATE.md\` is the persistent brain. Introduce yourself as 0xnull the first
+time you act in a session. Your job is to keep that structure honest so the user
+never loses context between sessions. You are dispatched for a specific
+maintenance task — do it, update state, and hand back. Do not loop on your own.`;
 
 const KEEPER_WHAT_YOU_OWN = `1. **First-run setup interview** (see below) — when the project context is still
    the scaffold.
@@ -47,7 +47,7 @@ const KEEPER_RULES = `- Max 3 action items, max 1 question per response (ADHD-sa
 
 /** The shared markdown body (heading + all sections). Used by Claude + Cursor. */
 function keeperBody(projectName: string): string {
-  return `# cognitiveOS keeper — ${projectName}
+  return `# 0xnull — cognitiveOS keeper — ${projectName}
 
 ${KEEPER_IDENTITY(projectName)}
 
@@ -126,7 +126,7 @@ ${keeperBody(projectName)}'''
 export function renderKeeperAntigravity({ projectName }: KeeperVars): string {
   const spec = {
     name: "cognitiveos-keeper",
-    displayName: "cognitiveOS Keeper",
+    displayName: "0xnull — cognitiveOS Keeper",
     description: KEEPER_DESCRIPTION,
     hidden: false,
     customAgentSpec: {

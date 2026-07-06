@@ -33,7 +33,16 @@ describe("keeper renders — one body, four formats", () => {
   it("Cursor keeper has minimal YAML frontmatter (name + description)", () => {
     const md = renderKeeperCursor(V);
     expect(md.startsWith("---\nname: cognitiveos-keeper\n")).toBe(true);
-    expect(md).toContain("# cognitiveOS keeper — demo");
+    expect(md).toContain("# 0xnull — cognitiveOS keeper — demo");
+  });
+
+  it("carries the 0xnull persona (slug stays cognitiveos-keeper)", () => {
+    const md = renderKeeperAgent(V);
+    expect(md).toContain("name: cognitiveos-keeper"); // dispatch slug unchanged
+    expect(md).toContain("You are **0xnull**");
+    const spec = JSON.parse(renderKeeperAntigravity(V));
+    expect(spec.name).toBe("cognitiveos-keeper");
+    expect(spec.displayName).toContain("0xnull");
   });
 
   it("Codex keeper is TOML with a literal instructions block, no ''' in body", () => {
