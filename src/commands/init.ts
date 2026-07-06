@@ -265,12 +265,13 @@ export function renderSummary(
   return [
     emerald(`✓ cognitiveOS ready in ${projectDir}`),
     "",
-    emerald("Next steps:"),
-    muted(`   1. Open your agent in this folder (${agentList}).`),
-    muted("   2. First session: it runs a 60-second setup (6 questions) to learn this project."),
-    muted(`   3. Capture your first thought:  cognitiveos dump "the thing on your mind"`),
-    muted("   4. See where you stand anytime:  cognitiveos start"),
-    muted("   5. Health check + drift repair:  cognitiveos check --fix"),
+    emerald(`▶ NEXT: open ${agentList} in this folder.`),
+    muted("   Your first session offers a 60-second setup (6 questions) so it learns this project."),
+    "",
+    muted("Day to day:"),
+    muted(`   cognitiveos dump "..."      capture a thought, anytime`),
+    muted("   cognitiveos start           resume where you left off"),
+    muted("   cognitiveos check --fix     health check + repair"),
   ].join("\n");
 }
 

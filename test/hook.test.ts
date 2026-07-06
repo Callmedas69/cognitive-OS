@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { runSessionHook } from "../src/commands/hook.js";
 import { readStdinThenHook } from "../src/commands/hook.js";
 import { buildMissionControl } from "../src/commands/start.js";
-import { SETUP_SENTINEL } from "../src/templates/first-run-block.js";
+import { SETUP_SENTINEL, SETUP_DEFERRED } from "../src/templates/first-run-block.js";
 
 let dir: string;
 beforeEach(() => {
@@ -41,6 +41,18 @@ describe("runSessionHook", () => {
     const out = runSessionHook(JSON.stringify({ hook_event_name: "SessionStart" }), "claude", dir);
     expect(JSON.parse(out).hookSpecificOutput.additionalContext).not.toContain("FIRST RUN");
     expect(buildMissionControl(dir)?.setupNeeded).toBeUndefined();
+  });
+
+  it("deferred marker → hook is silent (no FIRST RUN nag), still tracked", () => {
+    writeFileSync(
+      join(dir, "STATE.md"),
+      `${SETUP_DEFERRED}\n## Current Focus\nShip the session hook\n`,
+    );
+    const out = runSessionHook(JSON.stringify({ hook_event_name: "SessionStart" }), "claude", dir);
+    expect(JSON.parse(out).hookSpecificOutput.additionalContext).not.toContain("FIRST RUN");
+    const mc = buildMissionControl(dir);
+    expect(mc?.setupNeeded).toBeUndefined();
+    expect(mc?.setupDeferred).toBe(true);
   });
 
   it("claude SessionStart event → additionalContext envelope", () => {

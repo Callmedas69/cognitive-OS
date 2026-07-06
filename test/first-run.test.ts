@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import {
   SETUP_SENTINEL,
+  SETUP_DEFERRED,
   FIRST_RUN_MARKER,
   FIRST_RUN_BLOCK,
 } from "../src/templates/first-run-block.js";
@@ -38,6 +39,14 @@ describe("first-run-block source", () => {
     expect(FIRST_RUN_BLOCK).toMatch(/yourself, a client, or an audience/i);
     expect(FIRST_RUN_BLOCK).toContain("Working mode");
     expect(FIRST_RUN_BLOCK).toMatch(/scope and\s+deadline discipline/i);
+  });
+
+  it("deferred marker is a distinct html comment; decline swaps to it", () => {
+    expect(SETUP_DEFERRED.startsWith("<!--")).toBe(true);
+    expect(SETUP_DEFERRED.endsWith("-->")).toBe(true);
+    expect(SETUP_DEFERRED).not.toBe(SETUP_SENTINEL);
+    // The decline path tells the agent to replace the sentinel with the deferred marker.
+    expect(FIRST_RUN_BLOCK).toContain(SETUP_DEFERRED);
   });
 });
 
@@ -130,5 +139,17 @@ describe("check — setup soft warn", () => {
     const r = find("setup");
     expect(r.warn).toBeFalsy();
     expect(r.detail).toBe("done");
+  });
+
+  it("declined (deferred marker) → still a soft warn, but tracked as deferred", () => {
+    const statePath = join(dir, "STATE.md");
+    const deferred = readFileSync(statePath, "utf8").replace(SETUP_SENTINEL, SETUP_DEFERRED);
+    writeFileSync(statePath, deferred);
+    const r = find("setup");
+    expect(r.ok).toBe(true);
+    expect(r.warn).toBe(true);
+    expect(r.detail).toMatch(/deferred/);
+    // report still passes — deferral is never a failure
+    expect(renderCheckReport(runChecks(dir))).toContain("All checks passed.");
   });
 });

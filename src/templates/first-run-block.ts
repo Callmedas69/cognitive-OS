@@ -14,6 +14,13 @@
 /** Machine-readable marker stamped into a fresh STATE.md; removed after setup. */
 export const SETUP_SENTINEL = "<!-- cognitiveos:setup-needed -->";
 
+/**
+ * Written in place of SETUP_SENTINEL when the user declines the interview. The
+ * session-start hook goes silent on this (no more nag), but `check` still tracks
+ * it as a soft ⚠ so the user can set up later. Setup completing removes it too.
+ */
+export const SETUP_DEFERRED = "<!-- cognitiveos:setup-deferred -->";
+
 /** Stable heading `check`/tests grep for to confirm the first-run block is present. */
 export const FIRST_RUN_MARKER = "## First run — set up project context";
 
@@ -31,8 +38,10 @@ first session (and never again after), offer to set it up:
 > "Want a 60-second setup? I'll ask 6 quick questions so I always know this
 > project's context. (Y/n)"
 
-- If the user declines or wants to start working, **do not push** — leave the
-  marker in place and continue. They can set it up any time later.
+- If the user declines or wants to start working, **do not push**. Replace the
+  \`${SETUP_SENTINEL}\` line in STATE.md with \`${SETUP_DEFERRED}\` and continue —
+  this stops the offer from repeating every session while still letting them set
+  it up any time later.
 - If they accept, ask these **one at a time** (one question per reply). Where you
   can, pre-fill a guess from the repo (README, package.json, git log) and ask the
   user to confirm or correct rather than asking cold:
@@ -57,5 +66,6 @@ Adapt your thinking to the Working mode from then on: client work → scope and
 deadline discipline (log every scope change); audience work → publishing cadence
 and voice; own project → momentum over polish.
 
-Finally, **remove the \`${SETUP_SENTINEL}\` line from STATE.md** so the offer never
-repeats. Keep it tight — this is setup, not a meeting.`;
+Finally, **remove the setup marker line from STATE.md** (whether it is
+\`${SETUP_SENTINEL}\` or \`${SETUP_DEFERRED}\`) so the offer never repeats. Keep it
+tight — this is setup, not a meeting.`;

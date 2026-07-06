@@ -56,7 +56,7 @@ describe("renderSummary", () => {
     const out = renderSummary("/tmp/my-proj");
     expect(out).toContain("/tmp/my-proj");
     expect(out).toContain("✓ cognitiveOS ready in");
-    expect(out).toContain("Next steps:");
+    expect(out).toContain("▶ NEXT: open");
     expect(out).toContain("60-second setup (6 questions)");
     expect(out).not.toContain(ESC);
   });

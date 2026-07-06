@@ -8,7 +8,7 @@ import { safeWrite } from "../lib/fs-utils.js";
 import { ZONE_CONTEXTS } from "../templates/contexts/index.js";
 import { wireSessionHooks, claudeStopWired } from "../generators/session-hook.js";
 import { LOOP_MARKER } from "../templates/loop-block.js";
-import { SETUP_SENTINEL } from "../templates/first-run-block.js";
+import { SETUP_SENTINEL, SETUP_DEFERRED } from "../templates/first-run-block.js";
 import type { AgentId } from "../types.js";
 
 export interface CheckResult {
@@ -71,13 +71,16 @@ export function runChecks(targetDir: string, now: Date = new Date()): CheckResul
   const stateForSetup = readIfExists(memPath);
   if (stateForSetup !== null) {
     const needsSetup = stateForSetup.includes(SETUP_SENTINEL);
+    const deferred = stateForSetup.includes(SETUP_DEFERRED);
     results.push({
       label: "setup",
       ok: true,
-      warn: needsSetup,
+      warn: needsSetup || deferred,
       detail: needsSetup
         ? "context not set up — your agent will offer setup (or set it up anytime)"
-        : "done",
+        : deferred
+          ? "setup deferred — run it anytime to fill in project context"
+          : "done",
     });
   }
 

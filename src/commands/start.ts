@@ -4,7 +4,7 @@ import { parseState } from "../lib/parser.js";
 import { inboxStats } from "../lib/inbox.js";
 import { stalenessInfo } from "../lib/staleness.js";
 import { renderMissionControl, type MissionControlData } from "../lib/output.js";
-import { SETUP_SENTINEL } from "../templates/first-run-block.js";
+import { SETUP_SENTINEL, SETUP_DEFERRED } from "../templates/first-run-block.js";
 
 const SESSION_FILE = /^(\d{4}-\d{2}-\d{2})\.md$/;
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -107,8 +107,10 @@ export function buildMissionControl(
   // for the user to run `check`.
   const taskCount = countCurrentTasks(targetDir);
 
+  const stateText = readFileSync(memPath, "utf8");
   return {
-    setupNeeded: readFileSync(memPath, "utf8").includes(SETUP_SENTINEL) || undefined,
+    setupNeeded: stateText.includes(SETUP_SENTINEL) || undefined,
+    setupDeferred: stateText.includes(SETUP_DEFERRED) || undefined,
     stale: stale.stale ? { daysBehind: stale.daysBehind, source: stale.source } : undefined,
     doneWhen: readDoneWhen(targetDir),
     taskViolation: taskCount > 1 ? taskCount : undefined,

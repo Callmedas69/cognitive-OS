@@ -76,9 +76,10 @@ describe("renderSummary (TDD 4.1; TUI add-on A.2)", () => {
     const out = renderSummary("/path/to/proj");
     expect(out).toContain("cognitiveOS ready in");
     expect(out).toContain("/path/to/proj");
-    expect(out).toContain("Next steps:");
+    expect(out).toContain("▶ NEXT: open");
     expect(out).toContain("60-second setup (6 questions)");
-    expect(out).toContain('cognitiveos dump "the thing on your mind"');
+    expect(out).toContain("Day to day:");
+    expect(out).toContain('cognitiveos dump "..."');
     expect(out).toContain("cognitiveos start");
     expect(out).toContain("cognitiveos check --fix");
   });
