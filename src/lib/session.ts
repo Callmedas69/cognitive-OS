@@ -21,13 +21,21 @@ export interface SessionEntry {
   completed: string;
   openLoops: string;
   next: string;
+  /** Optional session name, derived from the current task → `Session — <name>`. */
+  name?: string;
+  /** Optional decision(s) made this session; log the revisit condition with each. */
+  decisions?: string;
 }
 
-/** One `## [HH:MM] Session` block (TDD 5.2). */
+/** One `## [HH:MM] Session` block (TDD 5.2). Name + decisions are optional. */
 export function renderSessionEntry(entry: SessionEntry, d: Date): string {
-  return `## [${formatTime(d)}] Session
+  const heading = entry.name
+    ? `## [${formatTime(d)}] Session — ${entry.name}`
+    : `## [${formatTime(d)}] Session`;
+  const decisions = entry.decisions ? `**Decisions:** ${entry.decisions}\n` : "";
+  return `${heading}
 **Completed:** ${entry.completed}
-**Open loops:** ${entry.openLoops}
+${decisions}**Open loops:** ${entry.openLoops}
 **Next:** ${entry.next}
 `;
 }

@@ -12,6 +12,12 @@ Then update STATE.md — it is a snapshot, not a log: overwrite, never grow.
 - Agent Notes — if over ~10, summarize and prune the oldest.
 
 Then append a session entry to sessions/YYYY-MM-DD.md with timestamp,
-completed work, open loops, next action. Keep entries under 10 lines.
-Confirm when done.
+completed work, open loops, next action. Name the entry after the current
+task: \`## [HH:MM] Session — <task>\`. If a decision was made, add a
+\`**Decisions:**\` line stating the choice and its revisit condition. Keep
+entries under 10 lines.
+
+A decision that outlives the day (a locked choice, not a passing one) gets
+elevated to the project's CONTEXT.md with its revisit condition, so it is not
+buried in the daily log. Confirm when done.
 `;

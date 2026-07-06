@@ -31,6 +31,8 @@ const KEEPER_WHAT_YOU_OWN = `1. **First-run setup interview** (see below) — wh
    accurate as the project moves.
 4. **Session-end handoff** — write the handoff (last worked on / stopped because /
    pick up by / watch out for) so the next session resumes cold with zero ramp-up.
+   Name the session log entry after the task; record decisions with their revisit
+   condition, and elevate a decision that outlives the day to the project CONTEXT.md.
 5. **Drift repair** — run \`cognitiveos check\` and, for safe issues, \`cognitiveos
    check --fix\`. Never hand-edit generated files when \`--fix\` can do it.
 

@@ -21,9 +21,26 @@ describe("session log formatting (TDD 5.2)", () => {
       FIXED
     );
     expect(md).toContain("## [09:07] Session");
+    expect(md).not.toContain("Session —");
     expect(md).toContain("**Completed:** did X");
+    expect(md).not.toContain("**Decisions:**");
     expect(md).toContain("**Open loops:** none");
     expect(md).toContain("**Next:** run start");
+  });
+
+  it("adds the name to the header and a Decisions line when set", () => {
+    const md = renderSessionEntry(
+      {
+        completed: "did X",
+        openLoops: "none",
+        next: "run start",
+        name: "arcnotify webhook retry",
+        decisions: "chose X over Y; revisit if Z",
+      },
+      FIXED
+    );
+    expect(md).toContain("## [09:07] Session — arcnotify webhook retry");
+    expect(md).toContain("**Decisions:** chose X over Y; revisit if Z");
   });
 });
 
@@ -55,10 +72,20 @@ describe("generateFirstSession", () => {
 });
 
 describe("renderSummary (TDD 4.1; TUI add-on A.2)", () => {
-  it("tells the user it's ready, names the project dir, and points to the next action", () => {
+  it("tells the user it's ready, names the project dir, and lists the next steps", () => {
     const out = renderSummary("/path/to/proj");
     expect(out).toContain("cognitiveOS ready in");
     expect(out).toContain("/path/to/proj");
-    expect(out).toContain("It will offer a 60-second setup (6 questions) to learn this project.");
+    expect(out).toContain("Next steps:");
+    expect(out).toContain("60-second setup (6 questions)");
+    expect(out).toContain('cognitiveos dump "the thing on your mind"');
+    expect(out).toContain("cognitiveos start");
+    expect(out).toContain("cognitiveos check --fix");
+  });
+
+  it("lists only the agents selected at init", () => {
+    const out = renderSummary("/p", ["claude-code"]);
+    expect(out).toContain("Claude Code");
+    expect(out).not.toContain("Codex");
   });
 });

@@ -66,8 +66,11 @@ ${LOOP_BLOCK}
 Update \`STATE.md\` (Current Focus, Blockers, Open Loops, Session Handoff,
 Recently Completed) from what happened. Write the Session Handoff so the next
 session knows exactly where to resume. Then append a short entry (under 10
-lines) to \`sessions/YYYY-MM-DD.md\`: timestamp, completed work, open loops,
-next action. Never edit past session logs.
+lines) to \`sessions/YYYY-MM-DD.md\`: name it after the current task
+(\`## [HH:MM] Session — <task>\`), then timestamp, completed work, a
+\`**Decisions:**\` line if one was made (state the choice + revisit condition),
+open loops, next action. A decision that outlives the day gets elevated to the
+project's CONTEXT.md with its revisit condition. Never edit past session logs.
 `;
 }
 

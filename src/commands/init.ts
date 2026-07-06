@@ -249,12 +249,28 @@ export function runInit(
   return atomicGenerate(targetDir, (stage) => generateAll(stage, answers, now));
 }
 
-/** Success summary printed after init (TDD 4.1 step 5; TUI add-on A.2). */
-export function renderSummary(projectDir: string): string {
+const AGENT_LABELS: Record<AgentId, string> = {
+  "claude-code": "Claude Code",
+  codex: "Codex",
+  cursor: "Cursor",
+  antigravity: "Antigravity",
+};
+
+/** Success summary + next-steps printed after init (TDD 4.1 step 5; TUI add-on A.2). */
+export function renderSummary(
+  projectDir: string,
+  agents: AgentId[] = ["claude-code", "codex", "cursor", "antigravity"],
+): string {
+  const agentList = agents.map((a) => AGENT_LABELS[a]).join(" / ");
   return [
     emerald(`✓ cognitiveOS ready in ${projectDir}`),
-    emerald("→  Next: open your agent."),
-    muted("   It will offer a 60-second setup (6 questions) to learn this project."),
+    "",
+    emerald("Next steps:"),
+    muted(`   1. Open your agent in this folder (${agentList}).`),
+    muted("   2. First session: it runs a 60-second setup (6 questions) to learn this project."),
+    muted(`   3. Capture your first thought:  cognitiveos dump "the thing on your mind"`),
+    muted("   4. See where you stand anytime:  cognitiveos start"),
+    muted("   5. Health check + drift repair:  cognitiveos check --fix"),
   ].join("\n");
 }
 
@@ -342,5 +358,5 @@ export async function initCommand(
     );
   }
 
-  outro(renderSummary(cwd));
+  outro(renderSummary(cwd, answers.agents));
 }

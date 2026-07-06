@@ -7,6 +7,9 @@ import type { InitAnswers } from "../types.js";
 function projectRootContext(name: string): string {
   return `# ${name} — project CONTEXT
 
+## What This Is
+The working folder for ${name}: everything this project needs lives here.
+
 ## Role
 Steward of the ${name} project.
 
@@ -22,6 +25,17 @@ Update this project's working files.
 
 ## Handoff
 Pause → someday/. Finish → log to sessions/.
+
+## Process
+1. Read this file, then the stage CONTEXT.md before acting in a stage.
+2. Work one stage at a time; update the STATE.md focus line as it moves.
+
+## Boundaries
+- Belongs here: working files for ${name}.
+- Does not belong: other projects' files, raw ideas (brain-dump/).
+
+## Tools
+None — file edits only.
 `;
 }
 
