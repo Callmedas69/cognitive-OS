@@ -189,7 +189,7 @@ describe("keeper check", () => {
   });
 
   it("fails and names the agent when a keeper file is deleted", () => {
-    rmSync(join(dir, ".codex", "agents", "cognitiveos-keeper.toml"), { force: true });
+    rmSync(join(dir, ".codex", "agents", "0xnull-the-keeper.toml"), { force: true });
     const r = find("keeper");
     expect(r.ok).toBe(false);
     expect(r.detail).toContain("codex");

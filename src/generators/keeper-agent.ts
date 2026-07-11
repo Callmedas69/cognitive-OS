@@ -14,34 +14,34 @@ import type { InitAnswers } from "../types.js";
  * longer needs a Claude-only guard). Mirrors the other generators: safeWrite,
  * never overwrites.
  *
- * - claude-code  → .claude/agents/cognitiveos-keeper.md
- * - cursor       → .cursor/agents/cognitiveos-keeper.md
- * - codex        → .codex/agents/cognitiveos-keeper.toml
- * - antigravity  → .agents/agents/cognitiveos-keeper/agent.json
+ * - claude-code  → .claude/agents/0xnull-the-keeper.md
+ * - cursor       → .cursor/agents/0xnull-the-keeper.md
+ * - codex        → .codex/agents/0xnull-the-keeper.toml
+ * - antigravity  → .agents/agents/0xnull-the-keeper/agent.json
  */
 export function generateKeeperAgent(targetDir: string, answers: InitAnswers): void {
   const vars = { projectName: answers.projectName };
   if (answers.agents.includes("claude-code")) {
     safeWrite(
-      join(targetDir, ".claude", "agents", "cognitiveos-keeper.md"),
+      join(targetDir, ".claude", "agents", "0xnull-the-keeper.md"),
       renderKeeperAgent(vars),
     );
   }
   if (answers.agents.includes("cursor")) {
     safeWrite(
-      join(targetDir, ".cursor", "agents", "cognitiveos-keeper.md"),
+      join(targetDir, ".cursor", "agents", "0xnull-the-keeper.md"),
       renderKeeperCursor(vars),
     );
   }
   if (answers.agents.includes("codex")) {
     safeWrite(
-      join(targetDir, ".codex", "agents", "cognitiveos-keeper.toml"),
+      join(targetDir, ".codex", "agents", "0xnull-the-keeper.toml"),
       renderKeeperCodex(vars),
     );
   }
   if (answers.agents.includes("antigravity")) {
     safeWrite(
-      join(targetDir, ".agents", "agents", "cognitiveos-keeper", "agent.json"),
+      join(targetDir, ".agents", "agents", "0xnull-the-keeper", "agent.json"),
       renderKeeperAntigravity(vars),
     );
   }

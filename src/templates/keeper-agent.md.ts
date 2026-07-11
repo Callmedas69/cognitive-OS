@@ -43,7 +43,11 @@ const KEEPER_RULES = `- Max 3 action items, max 1 question per response (ADHD-sa
 - \`focus/current-task.md\` holds exactly ONE task — enforce it.
 - Never present a menu of raw options: analyze, then recommend ONE.
 - Never overwrite user content. The CLI's \`--fix\` only repairs generated files
-  and never touches STATE.md content.`;
+  and never touches STATE.md content.
+- If you cannot reach the user with a question (no question tool, or this
+  platform can't surface a dispatched subagent's questions), stop and hand
+  back to the main thread: report what you need answered and let it collect
+  the answers instead of guessing.`;
 
 /** The shared markdown body (heading + all sections). Used by Claude + Cursor. */
 function keeperBody(projectName: string): string {
@@ -78,9 +82,9 @@ ${KEEPER_RULES}
  */
 export function renderKeeperAgent({ projectName }: KeeperVars): string {
   return `---
-name: cognitiveos-keeper
+name: 0xnull-the-keeper
 description: ${KEEPER_DESCRIPTION}
-tools: Read, Write, Edit, Bash, Glob, Grep
+tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
 model: inherit
 # model: haiku   # optional: pin cheap model for maintenance-only runs
 ---
@@ -89,13 +93,13 @@ ${keeperBody(projectName)}`;
 }
 
 /**
- * Cursor project subagent (`.cursor/agents/cognitiveos-keeper.md`). Same body as
+ * Cursor project subagent (`.cursor/agents/0xnull-the-keeper.md`). Same body as
  * Claude; Cursor's minimal frontmatter is just name + description (it manages
  * tools/model itself).
  */
 export function renderKeeperCursor({ projectName }: KeeperVars): string {
   return `---
-name: cognitiveos-keeper
+name: 0xnull-the-keeper
 description: ${KEEPER_DESCRIPTION}
 ---
 
@@ -103,13 +107,13 @@ ${keeperBody(projectName)}`;
 }
 
 /**
- * Codex project custom agent (`.codex/agents/cognitiveos-keeper.toml`). TOML
+ * Codex project custom agent (`.codex/agents/0xnull-the-keeper.toml`). TOML
  * literal multiline (`'''…'''`) carries the body verbatim — the body must never
  * contain `'''` (enforced by test). description is a basic string (no quotes to
  * escape).
  */
 export function renderKeeperCodex({ projectName }: KeeperVars): string {
-  return `name = "cognitiveos-keeper"
+  return `name = "0xnull-the-keeper"
 description = "${KEEPER_DESCRIPTION}"
 developer_instructions = '''
 ${keeperBody(projectName)}'''
@@ -117,7 +121,7 @@ ${keeperBody(projectName)}'''
 }
 
 /**
- * Antigravity project custom agent (`.agents/agents/cognitiveos-keeper/agent.json`).
+ * Antigravity project custom agent (`.agents/agents/0xnull-the-keeper/agent.json`).
  * Shape verified against a working Antigravity agent: name/displayName/description/
  * hidden + customAgentSpec.customAgent.{systemPromptSections,toolNames}. Built as an
  * object and JSON.stringified so every value is escaped correctly. toolNames are
@@ -125,7 +129,7 @@ ${keeperBody(projectName)}'''
  */
 export function renderKeeperAntigravity({ projectName }: KeeperVars): string {
   const spec = {
-    name: "cognitiveos-keeper",
+    name: "0xnull-the-keeper",
     displayName: "0xnull — cognitiveOS Keeper",
     description: KEEPER_DESCRIPTION,
     hidden: false,

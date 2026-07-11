@@ -43,10 +43,10 @@ const MAX_ACTIVE_PROJECTS = 3;
 // Detected agent → its keeper subagent file + renderer. Detection signal is
 // the installed skill file — same heuristic as session hooks, no new guessing.
 const KEEPERS = [
-  { name: "claude", skill: join(".claude", "skills", "cognitiveos", "SKILL.md"), file: join(".claude", "agents", "cognitiveos-keeper.md"), render: renderKeeperAgent },
-  { name: "codex", skill: join(".codex", "skills", "cognitiveos", "SKILL.md"), file: join(".codex", "agents", "cognitiveos-keeper.toml"), render: renderKeeperCodex },
-  { name: "cursor", skill: join(".cursor", "rules", "cognitiveos.mdc"), file: join(".cursor", "agents", "cognitiveos-keeper.md"), render: renderKeeperCursor },
-  { name: "antigravity", skill: join(".agents", "skills", "cognitiveos", "SKILL.md"), file: join(".agents", "agents", "cognitiveos-keeper", "agent.json"), render: renderKeeperAntigravity },
+  { name: "claude", skill: join(".claude", "skills", "cognitiveos", "SKILL.md"), file: join(".claude", "agents", "0xnull-the-keeper.md"), render: renderKeeperAgent },
+  { name: "codex", skill: join(".codex", "skills", "cognitiveos", "SKILL.md"), file: join(".codex", "agents", "0xnull-the-keeper.toml"), render: renderKeeperCodex },
+  { name: "cursor", skill: join(".cursor", "rules", "cognitiveos.mdc"), file: join(".cursor", "agents", "0xnull-the-keeper.md"), render: renderKeeperCursor },
+  { name: "antigravity", skill: join(".agents", "skills", "cognitiveos", "SKILL.md"), file: join(".agents", "agents", "0xnull-the-keeper", "agent.json"), render: renderKeeperAntigravity },
 ] as const;
 
 function readIfExists(p: string): string | null {

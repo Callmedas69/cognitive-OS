@@ -16,6 +16,10 @@ describe("hook templates (TDD 4.6)", () => {
     expect(HOOKS["end-session"]).toContain("sessions/YYYY-MM-DD.md");
   });
 
+  it("end-session dispatches the 0xnull-the-keeper subagent for the writes", () => {
+    expect(HOOKS["end-session"]).toContain("0xnull-the-keeper");
+  });
+
   it("dump appends to inbox without categorizing", () => {
     expect(HOOKS["dump"]).toContain("brain-dump/inbox.md");
     expect(HOOKS["dump"]).toContain("Do not categorize");

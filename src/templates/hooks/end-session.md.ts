@@ -1,7 +1,12 @@
 export const endSessionHook = `Ask the user exactly one question: "What did you complete this session,
 any new blockers or open loops, and where are you stopping?"
 
-Then update STATE.md — it is a snapshot, not a log: overwrite, never grow.
+Then dispatch the \`0xnull-the-keeper\` subagent with the user's
+answer and the instructions below — the session-end writes are the keeper's
+job, keep them off the main thread. Only if the keeper cannot be dispatched,
+do it yourself.
+
+Update STATE.md — it is a snapshot, not a log: overwrite, never grow.
 - Current Focus, Blockers, Recently Completed — set to current reality.
 - Session Handoff — overwrite all four fields so the next session resumes
   instantly: Last worked on / Stopped because / Pick up by / Watch out for.

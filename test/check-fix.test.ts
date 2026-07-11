@@ -67,10 +67,10 @@ describe("runFix", () => {
 
 describe("runFix — keeper subagents", () => {
   const keeperPaths = [
-    join(".claude", "agents", "cognitiveos-keeper.md"),
-    join(".codex", "agents", "cognitiveos-keeper.toml"),
-    join(".cursor", "agents", "cognitiveos-keeper.md"),
-    join(".agents", "agents", "cognitiveos-keeper", "agent.json"),
+    join(".claude", "agents", "0xnull-the-keeper.md"),
+    join(".codex", "agents", "0xnull-the-keeper.toml"),
+    join(".cursor", "agents", "0xnull-the-keeper.md"),
+    join(".agents", "agents", "0xnull-the-keeper", "agent.json"),
   ];
 
   it("restores a deleted keeper byte-identical to the init output", () => {
@@ -96,8 +96,8 @@ describe("runFix — keeper subagents", () => {
 
   it("does not create keeper files for agents whose skill is absent", () => {
     rmSync(join(dir, ".codex", "skills", "cognitiveos", "SKILL.md"), { force: true });
-    rmSync(join(dir, ".codex", "agents", "cognitiveos-keeper.toml"), { force: true });
+    rmSync(join(dir, ".codex", "agents", "0xnull-the-keeper.toml"), { force: true });
     runFix(dir);
-    expect(existsSync(join(dir, ".codex", "agents", "cognitiveos-keeper.toml"))).toBe(false);
+    expect(existsSync(join(dir, ".codex", "agents", "0xnull-the-keeper.toml"))).toBe(false);
   });
 });

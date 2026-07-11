@@ -69,10 +69,24 @@ describe("skills carry the first-run section", () => {
   });
 });
 
+describe("cognitiveos-skill.md.ts — keeper dispatch + loop dedupe", () => {
+  it("dispatches 0xnull-the-keeper for first-run setup and session end", () => {
+    const md = renderSkillBody({ projectName: "p" });
+    expect(md).toContain("0xnull-the-keeper");
+    expect(md.match(/0xnull-the-keeper/g)?.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it("points to CLAUDE.md/AGENTS.md for the loop instead of embedding it", () => {
+    const md = renderSkillBody({ projectName: "p" });
+    expect(md).toContain("## How To Work Here");
+    expect(md).not.toContain("Pick one thing"); // LOOP_BLOCK body, not duplicated here
+  });
+});
+
 describe("keeper subagent template", () => {
   it("has Claude subagent frontmatter with model: inherit + the mandate", () => {
     const md = renderKeeperAgent({ projectName: "my-dapp" });
-    expect(md).toMatch(/^---\nname: cognitiveos-keeper\n/);
+    expect(md).toMatch(/^---\nname: 0xnull-the-keeper\n/);
     expect(md).toContain("model: inherit");
     expect(md).toContain("my-dapp");
     expect(md).toContain(FIRST_RUN_MARKER); // owns the interview
@@ -87,7 +101,7 @@ describe("init generates the Claude keeper for claude-code selections", () => {
   });
   afterEach(() => rmSync(dir, { recursive: true, force: true }));
 
-  const KEEPER = () => join(dir, ".claude", "agents", "cognitiveos-keeper.md");
+  const KEEPER = () => join(dir, ".claude", "agents", "0xnull-the-keeper.md");
   const answers = (over: Partial<InitAnswers> = {}): InitAnswers => ({
     agents: ["claude-code"],
     projectType: "mixed",

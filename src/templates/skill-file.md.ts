@@ -111,22 +111,22 @@ ${folderTree(projectName, projectType, agents)}
 | End a session | sessions/ | STATE.md | \`/end-session\`, keeper agent | Editing past logs |
 | Health check | ./ | — | \`cognitiveos check --fix\` | Hand-editing CLAUDE.md/AGENTS.md drift |
 
+## Active Project
+Current project: **${projectName}** (projects/${projectName}/)
+${blockchainBlock}
 ## Naming Conventions
 - Files and folders: lowercase, hyphens, no spaces or symbols (\`my-project\`, not \`My Project\`).
 - Dates: ISO \`YYYY-MM-DD\` — session logs are \`sessions/YYYY-MM-DD.md\`.
 - Constants (never rename): \`CLAUDE.md\`, \`AGENTS.md\`, \`STATE.md\`, \`CONTEXT.md\`.
 - New project folders under projects/ follow the same slug rules as the active project.
 
-## Active Project
-Current project: **${projectName}** (projects/${projectName}/)
-${blockchainBlock}
 ## ADHD Rules (non-negotiable)
 - Max 3 action items per response
 - Max 1 question per response
 - current-task.md holds ONE task only — enforce this, always
 - Every task carries a "Done when" — when it's met: stop, log, clear. Don't chain into the next task unprompted
 - Session start: read STATE.md, show current focus + open loops
-- Session end: update STATE.md + append to sessions/YYYY-MM-DD.md
+- Session end: dispatch \`0xnull-the-keeper\` to update STATE.md + append to sessions/YYYY-MM-DD.md (do it yourself only if your platform can't dispatch agents)
 
 ## What to Avoid
 - Don't put more than one task in focus/current-task.md.

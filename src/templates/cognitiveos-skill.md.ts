@@ -1,4 +1,3 @@
-import { LOOP_BLOCK } from "./loop-block.js";
 import { FIRST_RUN_BLOCK } from "./first-run-block.js";
 
 export interface SkillVars {
@@ -31,6 +30,11 @@ Active project: **${projectName}** (\`projects/${projectName}/\`).
 
 ${FIRST_RUN_BLOCK}
 
+If the user accepts setup, dispatch the \`0xnull-the-keeper\` subagent to run
+the interview and write the answers — keep it off the main thread. If your
+platform can't surface a dispatched subagent's questions, ask the 6 questions
+yourself one at a time, then dispatch the keeper with the answers to write.
+
 ## Zone map — route every task
 
 Each folder has a \`CONTEXT.md\`. Read it before acting in that zone.
@@ -59,9 +63,18 @@ Claude Code also exposes slash hooks: \`/start-session\`, \`/end-session\`, \`/d
 - Max 1 question per response.
 - \`focus/current-task.md\` holds ONE task only — enforce this, always.
 
-${LOOP_BLOCK}
+## How To Work Here
+
+The in-session agentic loop (read state → one action → update → re-read) and
+its rules live in \`CLAUDE.md\` / \`AGENTS.md\` at the project root — already
+auto-loaded alongside this skill. Not repeated here to avoid double-loading it
+in the same context window.
 
 ## At session end — ALWAYS
+
+Dispatch the \`0xnull-the-keeper\` subagent to do the session-end writes below
+— keep them off the main thread. Only if your platform can't dispatch agents,
+do them yourself.
 
 Update \`STATE.md\` (Current Focus, Blockers, Open Loops, Session Handoff,
 Recently Completed) from what happened. Write the Session Handoff so the next
