@@ -31,8 +31,9 @@ Active project: **${projectName}** (\`projects/${projectName}/\`).
 ${FIRST_RUN_BLOCK}
 
 Run the interview yourself on the main thread; a dispatched subagent cannot
-ask the user anything. Once you have the 6 answers, either write them
-yourself or dispatch \`0xnull-the-keeper\` with the answers to do the writes.
+ask the user anything. Once you have the 6 answers, write them yourself —
+they are already in your context. (Only dispatch \`0xnull-the-keeper\` for the
+writes if your context is already heavy.)
 
 ## Zone map — route every task
 
@@ -72,8 +73,10 @@ in the same context window.
 ## At session end — ALWAYS
 
 Dispatch the \`0xnull-the-keeper\` subagent to do the session-end writes below
-— keep them off the main thread. Only if your platform can't dispatch agents,
-do them yourself.
+when the session had real work or your context is heavy — that is what keeps
+a full handoff off the main thread. A trivial end (little happened) you can
+write inline. If your platform can't dispatch agents, always do them
+yourself.
 
 Update \`STATE.md\` (Current Focus, Blockers, Open Loops, Session Handoff,
 Recently Completed) from what happened. Write the Session Handoff so the next

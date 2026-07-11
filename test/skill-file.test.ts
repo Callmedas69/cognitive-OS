@@ -47,6 +47,15 @@ describe("renderSkillFile", () => {
     expect(md).toMatch(/Main thread \(you\)/);
   });
 
+  it("scopes dispatch vs inline writes (0.10.6)", () => {
+    const md = renderSkillFile({ projectName: "x", projectType: "content" });
+    expect(md).toContain("When to dispatch");
+    expect(md).toMatch(/inline/i);
+    // ADHD session-end bullet no longer reads as unconditional dispatch.
+    const sessionEndBullet = md.match(/^- Session end:[\s\S]*?(?=\n- |\n##)/m)?.[0] ?? "";
+    expect(sessionEndBullet).toMatch(/inline/i);
+  });
+
   it("documents naming conventions (smoke test #3)", () => {
     const md = renderSkillFile({ projectName: "x", projectType: "content" });
     expect(md).toContain("## Naming Conventions");

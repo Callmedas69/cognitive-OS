@@ -78,6 +78,11 @@ describe("cognitiveos-skill.md.ts — main-thread interview + keeper dispatch fo
     expect(md.match(/0xnull-the-keeper/g)?.length).toBeGreaterThanOrEqual(2);
   });
 
+  it("first-run writes are inline by default; keeper is the exception (0.10.6)", () => {
+    const md = renderSkillBody({ projectName: "p" });
+    expect(md).toContain("write them yourself");
+  });
+
   it("points to CLAUDE.md/AGENTS.md for the loop instead of embedding it", () => {
     const md = renderSkillBody({ projectName: "p" });
     expect(md).toContain("## How To Work Here");

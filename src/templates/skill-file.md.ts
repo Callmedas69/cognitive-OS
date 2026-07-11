@@ -121,7 +121,11 @@ ${blockchainBlock}
   STATE.md, session-end handoff, first-run answers (after you collect them), repair
   drift (\`cognitiveos check --fix\`). Runs to completion, cannot prompt the user;
   hands back if it needs an answer.
-- Keep the conversation on the main thread; dispatch 0xnull for the writes.
+- **When to dispatch 0xnull:** the session-end handoff, drift repair (\`cognitiveos check --fix\`),
+  or any time your context is getting heavy and you want the writes off the main thread.
+- **When to write inline instead:** small STATE.md touches and the first-run writes right after
+  you interviewed — the answers are already in your context; dispatching a cold subagent to write
+  a few lines only makes it re-read what you already hold. Inline is correct here, not a shortcut.
 
 ## Naming Conventions
 - Files and folders: lowercase, hyphens, no spaces or symbols (\`my-project\`, not \`My Project\`).
@@ -135,7 +139,9 @@ ${blockchainBlock}
 - current-task.md holds ONE task only — enforce this, always
 - Every task carries a "Done when" — when it's met: stop, log, clear. Don't chain into the next task unprompted
 - Session start: read STATE.md, show current focus + open loops
-- Session end: dispatch \`0xnull-the-keeper\` to update STATE.md + append to sessions/YYYY-MM-DD.md (do it yourself only if your platform can't dispatch agents)
+- Session end: write STATE.md + append to sessions/YYYY-MM-DD.md — dispatch \`0xnull-the-keeper\`
+  when the session had real work or your context is heavy; a trivial end you can write inline
+  (see **Agents — who does what**)
 
 ## What to Avoid
 - Don't put more than one task in focus/current-task.md.
