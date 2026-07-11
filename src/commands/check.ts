@@ -9,6 +9,12 @@ import { ZONE_CONTEXTS } from "../templates/contexts/index.js";
 import { wireSessionHooks, claudeStopWired } from "../generators/session-hook.js";
 import { LOOP_MARKER } from "../templates/loop-block.js";
 import { SETUP_SENTINEL, SETUP_DEFERRED } from "../templates/first-run-block.js";
+import {
+  renderKeeperAgent,
+  renderKeeperCursor,
+  renderKeeperCodex,
+  renderKeeperAntigravity,
+} from "../templates/keeper-agent.md.js";
 import type { AgentId } from "../types.js";
 
 export interface CheckResult {
@@ -33,6 +39,15 @@ const INBOX_WARN_COUNT = 10;
 const INBOX_WARN_DAYS = 7;
 // The skill rule says max 3 active projects; surface a soft ⚠ when exceeded.
 const MAX_ACTIVE_PROJECTS = 3;
+
+// Detected agent → its keeper subagent file + renderer. Detection signal is
+// the installed skill file — same heuristic as session hooks, no new guessing.
+const KEEPERS = [
+  { name: "claude", skill: join(".claude", "skills", "cognitiveos", "SKILL.md"), file: join(".claude", "agents", "cognitiveos-keeper.md"), render: renderKeeperAgent },
+  { name: "codex", skill: join(".codex", "skills", "cognitiveos", "SKILL.md"), file: join(".codex", "agents", "cognitiveos-keeper.toml"), render: renderKeeperCodex },
+  { name: "cursor", skill: join(".cursor", "rules", "cognitiveos.mdc"), file: join(".cursor", "agents", "cognitiveos-keeper.md"), render: renderKeeperCursor },
+  { name: "antigravity", skill: join(".agents", "skills", "cognitiveos", "SKILL.md"), file: join(".agents", "agents", "cognitiveos-keeper", "agent.json"), render: renderKeeperAntigravity },
+] as const;
 
 function readIfExists(p: string): string | null {
   return existsSync(p) ? readFileSync(p, "utf8") : null;
@@ -260,6 +275,24 @@ export function runChecks(targetDir: string, now: Date = new Date()): CheckResul
     });
   }
 
+  // 12. keeper subagent present for each detected agent skill — generated once
+  // at init and previously invisible here; a deleted keeper silently kills the
+  // first-run interview + upkeep. `--fix` restores missing ones.
+  const keepers = KEEPERS.filter((k) => existsSync(join(targetDir, k.skill)));
+  if (keepers.length === 0) {
+    results.push({ label: "keeper", ok: true, detail: "n/a" });
+  } else {
+    const missing = keepers.filter((k) => !existsSync(join(targetDir, k.file)));
+    results.push({
+      label: "keeper",
+      ok: missing.length === 0,
+      detail:
+        missing.length === 0
+          ? `${keepers.length}/${keepers.length} present`
+          : `missing: ${missing.map((m) => m.name).join(", ")}`,
+    });
+  }
+
   return results;
 }
 
@@ -347,6 +380,18 @@ export function runFix(targetDir: string): string[] {
   if (detected.length > 0) {
     const res = wireSessionHooks(targetDir, { agents: detected, projectType: "mixed", projectName: "project" });
     for (const w of res.wired) fixed.push(`${w} (session hook ensured)`);
+  }
+
+  // restore missing keeper subagents for detected agent skills. safeWrite only
+  // fills gaps — a hand-edited keeper that still exists is never overwritten.
+  const stateContent = existsSync(statePath) ? readFileSync(statePath, "utf8") : null;
+  const projectName =
+    (stateContent ? parseStateContent(stateContent).memory.currentFocus?.project : undefined) ??
+    "project";
+  for (const k of KEEPERS) {
+    if (!existsSync(join(targetDir, k.skill))) continue;
+    const res = safeWrite(join(targetDir, k.file), k.render({ projectName }));
+    if (res.written) fixed.push(`${k.file} (keeper restored)`);
   }
 
   return fixed;

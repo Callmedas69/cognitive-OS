@@ -180,3 +180,30 @@ describe("session-hook check", () => {
     );
   });
 });
+
+describe("keeper check", () => {
+  it("passes on a fresh full init (all 4 keepers present)", () => {
+    const r = find("keeper");
+    expect(r.ok).toBe(true);
+    expect(r.detail).toBe("4/4 present");
+  });
+
+  it("fails and names the agent when a keeper file is deleted", () => {
+    rmSync(join(dir, ".codex", "agents", "cognitiveos-keeper.toml"), { force: true });
+    const r = find("keeper");
+    expect(r.ok).toBe(false);
+    expect(r.detail).toContain("codex");
+  });
+
+  it("is n/a when no agent skills are installed", () => {
+    for (const p of [
+      join(".claude", "skills", "cognitiveos", "SKILL.md"),
+      join(".codex", "skills", "cognitiveos", "SKILL.md"),
+      join(".cursor", "rules", "cognitiveos.mdc"),
+      join(".agents", "skills", "cognitiveos", "SKILL.md"),
+    ]) {
+      rmSync(join(dir, p), { force: true });
+    }
+    expect(find("keeper").detail).toBe("n/a");
+  });
+});

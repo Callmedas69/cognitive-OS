@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { mkdtempSync, rmSync, writeFileSync, readFileSync } from "node:fs";
+import { mkdtempSync, rmSync, writeFileSync, readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { runChecks, runFix } from "../src/commands/check.js";
@@ -62,5 +62,42 @@ describe("runFix", () => {
 
   it("nothing to fix on a healthy install", () => {
     expect(runFix(dir)).toEqual([]);
+  });
+});
+
+describe("runFix — keeper subagents", () => {
+  const keeperPaths = [
+    join(".claude", "agents", "cognitiveos-keeper.md"),
+    join(".codex", "agents", "cognitiveos-keeper.toml"),
+    join(".cursor", "agents", "cognitiveos-keeper.md"),
+    join(".agents", "agents", "cognitiveos-keeper", "agent.json"),
+  ];
+
+  it("restores a deleted keeper byte-identical to the init output", () => {
+    for (const p of keeperPaths) {
+      const abs = join(dir, p);
+      const original = readFileSync(abs, "utf8");
+      rmSync(abs, { force: true });
+      expect(find("keeper").ok).toBe(false);
+
+      const fixed = runFix(dir);
+      expect(fixed.some((f) => f.includes("keeper restored"))).toBe(true);
+      expect(readFileSync(abs, "utf8")).toBe(original);
+      expect(find("keeper").ok).toBe(true);
+    }
+  });
+
+  it("never overwrites a hand-edited keeper that still exists", () => {
+    const abs = join(dir, keeperPaths[0]);
+    writeFileSync(abs, "MY CUSTOM KEEPER");
+    runFix(dir);
+    expect(readFileSync(abs, "utf8")).toBe("MY CUSTOM KEEPER");
+  });
+
+  it("does not create keeper files for agents whose skill is absent", () => {
+    rmSync(join(dir, ".codex", "skills", "cognitiveos", "SKILL.md"), { force: true });
+    rmSync(join(dir, ".codex", "agents", "cognitiveos-keeper.toml"), { force: true });
+    runFix(dir);
+    expect(existsSync(join(dir, ".codex", "agents", "cognitiveos-keeper.toml"))).toBe(false);
   });
 });
