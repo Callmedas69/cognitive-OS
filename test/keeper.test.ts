@@ -16,18 +16,19 @@ import type { InitAnswers } from "../src/types.js";
 const V = { projectName: "demo" };
 
 describe("keeper renders — one body, four formats", () => {
-  it("every render carries the first-run interview + loop block", () => {
+  it("keeper is writes-only: no interview, no first-run block, keeps the loop block", () => {
     for (const md of [renderKeeperAgent(V), renderKeeperCursor(V)]) {
-      expect(md).toContain(FIRST_RUN_MARKER);
+      expect(md).not.toContain(FIRST_RUN_MARKER);
       expect(md).toContain(LOOP_MARKER);
     }
   });
 
-  it("Claude keeper keeps its full frontmatter (name/tools/model)", () => {
+  it("Claude keeper keeps its full frontmatter (name/tools/model), no AskUserQuestion", () => {
     const md = renderKeeperAgent(V);
     expect(md).toContain("name: 0xnull-the-keeper");
     expect(md).toContain("model: inherit");
-    expect(md).toContain("tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion");
+    expect(md).toContain("tools: Read, Write, Edit, Bash, Glob, Grep");
+    expect(md).not.toContain("AskUserQuestion");
   });
 
   it("Cursor keeper has minimal YAML frontmatter (name + description)", () => {
@@ -49,18 +50,18 @@ describe("keeper renders — one body, four formats", () => {
     const toml = renderKeeperCodex(V);
     expect(toml).toContain('name = "0xnull-the-keeper"');
     expect(toml).toContain("developer_instructions = '''");
-    expect(toml).toContain(FIRST_RUN_MARKER);
+    expect(toml).not.toContain(FIRST_RUN_MARKER);
     // The literal block would break if the body itself contained a triple-quote.
     const body = toml.split("developer_instructions = '''\n")[1];
     expect(body.replace(/'''\s*$/, "")).not.toContain("'''");
   });
 
-  it("Antigravity keeper is valid JSON matching the verified agent shape", () => {
+  it("Antigravity keeper is valid JSON matching the verified agent shape, no interview section", () => {
     const spec = JSON.parse(renderKeeperAntigravity(V));
     expect(spec.name).toBe("0xnull-the-keeper");
     const sections = spec.customAgentSpec.customAgent.systemPromptSections;
     expect(sections.length).toBeGreaterThan(0);
-    expect(sections.map((s: { title: string }) => s.title)).toContain(
+    expect(sections.map((s: { title: string }) => s.title)).not.toContain(
       "First-Run Setup Interview",
     );
     expect(spec.customAgentSpec.customAgent.toolNames).toEqual([
@@ -70,15 +71,16 @@ describe("keeper renders — one body, four formats", () => {
     ]);
   });
 
-  it("keeper rules carry the can't-reach-the-user fallback (all platforms share it)", () => {
+  it("keeper rules declare it headless — no channel to ask the user, hand back instead", () => {
     for (const md of [renderKeeperAgent(V), renderKeeperCursor(V), renderKeeperCodex(V)]) {
-      expect(md).toMatch(/cannot reach the user/i);
+      expect(md).toMatch(/headless subagent/i);
+      expect(md).toMatch(/hand back to the main thread/i);
     }
     const spec = JSON.parse(renderKeeperAntigravity(V));
     const rules = spec.customAgentSpec.customAgent.systemPromptSections.find(
       (s: { title: string }) => s.title === "Rules",
     );
-    expect(rules.content).toMatch(/cannot reach the user/i);
+    expect(rules.content).toMatch(/headless subagent/i);
   });
 });
 

@@ -114,6 +114,15 @@ ${folderTree(projectName, projectType, agents)}
 ## Active Project
 Current project: **${projectName}** (projects/${projectName}/)
 ${blockchainBlock}
+## Agents — who does what
+- **Main thread (you):** interactive work — setup interview, one-question wrap-ups,
+  project work. Can talk to the user; a subagent cannot.
+- **0xnull-the-keeper (subagent):** dispatched for headless maintenance — write
+  STATE.md, session-end handoff, first-run answers (after you collect them), repair
+  drift (\`cognitiveos check --fix\`). Runs to completion, cannot prompt the user;
+  hands back if it needs an answer.
+- Keep the conversation on the main thread; dispatch 0xnull for the writes.
+
 ## Naming Conventions
 - Files and folders: lowercase, hyphens, no spaces or symbols (\`my-project\`, not \`My Project\`).
 - Dates: ISO \`YYYY-MM-DD\` — session logs are \`sessions/YYYY-MM-DD.md\`.

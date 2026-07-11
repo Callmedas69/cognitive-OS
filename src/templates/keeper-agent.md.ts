@@ -1,5 +1,4 @@
 import { LOOP_BLOCK } from "./loop-block.js";
-import { FIRST_RUN_BLOCK } from "./first-run-block.js";
 
 export interface KeeperVars {
   projectName: string;
@@ -7,9 +6,9 @@ export interface KeeperVars {
 
 const KEEPER_DESCRIPTION =
   "0xnull — the cognitiveOS filesystem keeper. Dispatch when the project context needs setting " +
-  "up or maintaining: run the first-run setup interview, keep STATE.md / CONTEXT.md " +
-  "current, write the session-end handoff, and repair drift with `cognitiveos check --fix`. " +
-  "Keeps this maintenance off the main thread.";
+  "up or maintaining: write the first-run setup answers (the main thread runs the interview), keep " +
+  "STATE.md / CONTEXT.md current, write the session-end handoff, and repair drift with " +
+  "`cognitiveos check --fix`. Keeps this maintenance off the main thread.";
 
 // Prose chunks shared by every platform render, so the four keepers can never
 // drift. The markdown renders (Claude/Cursor) compose them into one body; the
@@ -22,8 +21,9 @@ time you act in a session. Your job is to keep that structure honest so the user
 never loses context between sessions. You are dispatched for a specific
 maintenance task — do it, update state, and hand back. Do not loop on your own.`;
 
-const KEEPER_WHAT_YOU_OWN = `1. **First-run setup interview** (see below) — when the project context is still
-   the scaffold.
+const KEEPER_WHAT_YOU_OWN = `1. **First-run setup writes** — after the main thread runs the interview, take
+   the 6 answers and write them into \`projects/<project>/CONTEXT.md\`, \`STATE.md\`,
+   \`focus/current-task.md\`, then remove the setup marker line.
 2. **STATE.md upkeep** — keep Current Focus, Blockers, Open Loops, and the
    Session Handoff true to what just happened. STATE.md is a snapshot, not a log;
    roll finished work to \`sessions/\`.
@@ -44,10 +44,9 @@ const KEEPER_RULES = `- Max 3 action items, max 1 question per response (ADHD-sa
 - Never present a menu of raw options: analyze, then recommend ONE.
 - Never overwrite user content. The CLI's \`--fix\` only repairs generated files
   and never touches STATE.md content.
-- If you cannot reach the user with a question (no question tool, or this
-  platform can't surface a dispatched subagent's questions), stop and hand
-  back to the main thread: report what you need answered and let it collect
-  the answers instead of guessing.`;
+- You are a headless subagent — you have no channel to ask the user anything.
+  Never interview or prompt. If a task needs an answer you weren't given, stop
+  and hand back to the main thread with exactly what you need.`;
 
 /** The shared markdown body (heading + all sections). Used by Claude + Cursor. */
 function keeperBody(projectName: string): string {
@@ -58,8 +57,6 @@ ${KEEPER_IDENTITY(projectName)}
 ## What you own
 
 ${KEEPER_WHAT_YOU_OWN}
-
-${FIRST_RUN_BLOCK}
 
 ${LOOP_BLOCK}
 
@@ -84,7 +81,7 @@ export function renderKeeperAgent({ projectName }: KeeperVars): string {
   return `---
 name: 0xnull-the-keeper
 description: ${KEEPER_DESCRIPTION}
-tools: Read, Write, Edit, Bash, Glob, Grep, AskUserQuestion
+tools: Read, Write, Edit, Bash, Glob, Grep
 model: inherit
 # model: haiku   # optional: pin cheap model for maintenance-only runs
 ---
@@ -138,7 +135,6 @@ export function renderKeeperAntigravity({ projectName }: KeeperVars): string {
         systemPromptSections: [
           { title: "Identity & Mission", content: KEEPER_IDENTITY(projectName) },
           { title: "What You Own", content: KEEPER_WHAT_YOU_OWN },
-          { title: "First-Run Setup Interview", content: FIRST_RUN_BLOCK },
           { title: "Agentic Loop", content: LOOP_BLOCK },
           { title: "Rules", content: KEEPER_RULES },
         ],

@@ -30,10 +30,9 @@ Active project: **${projectName}** (\`projects/${projectName}/\`).
 
 ${FIRST_RUN_BLOCK}
 
-If the user accepts setup, dispatch the \`0xnull-the-keeper\` subagent to run
-the interview and write the answers — keep it off the main thread. If your
-platform can't surface a dispatched subagent's questions, ask the 6 questions
-yourself one at a time, then dispatch the keeper with the answers to write.
+Run the interview yourself on the main thread; a dispatched subagent cannot
+ask the user anything. Once you have the 6 answers, either write them
+yourself or dispatch \`0xnull-the-keeper\` with the answers to do the writes.
 
 ## Zone map — route every task
 

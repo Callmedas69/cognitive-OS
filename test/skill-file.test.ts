@@ -40,6 +40,13 @@ describe("renderSkillFile", () => {
     expect(claudeOnly).not.toContain(".codex/");
   });
 
+  it("documents the main-thread/keeper agent split (0.10.5)", () => {
+    const md = renderSkillFile({ projectName: "x", projectType: "content" });
+    expect(md).toContain("## Agents — who does what");
+    expect(md).toContain("0xnull-the-keeper");
+    expect(md).toMatch(/Main thread \(you\)/);
+  });
+
   it("documents naming conventions (smoke test #3)", () => {
     const md = renderSkillFile({ projectName: "x", projectType: "content" });
     expect(md).toContain("## Naming Conventions");

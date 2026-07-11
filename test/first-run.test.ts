@@ -69,9 +69,11 @@ describe("skills carry the first-run section", () => {
   });
 });
 
-describe("cognitiveos-skill.md.ts — keeper dispatch + loop dedupe", () => {
-  it("dispatches 0xnull-the-keeper for first-run setup and session end", () => {
+describe("cognitiveos-skill.md.ts — main-thread interview + keeper dispatch for writes", () => {
+  it("runs the interview on the main thread, dispatches 0xnull-the-keeper for the writes and session end", () => {
     const md = renderSkillBody({ projectName: "p" });
+    expect(md).toMatch(/run the interview yourself/i);
+    expect(md).toMatch(/cannot\s+ask the user anything/i);
     expect(md).toContain("0xnull-the-keeper");
     expect(md.match(/0xnull-the-keeper/g)?.length).toBeGreaterThanOrEqual(2);
   });
@@ -84,12 +86,12 @@ describe("cognitiveos-skill.md.ts — keeper dispatch + loop dedupe", () => {
 });
 
 describe("keeper subagent template", () => {
-  it("has Claude subagent frontmatter with model: inherit + the mandate", () => {
+  it("has Claude subagent frontmatter with model: inherit + the mandate, writes-only (no interview)", () => {
     const md = renderKeeperAgent({ projectName: "my-dapp" });
     expect(md).toMatch(/^---\nname: 0xnull-the-keeper\n/);
     expect(md).toContain("model: inherit");
     expect(md).toContain("my-dapp");
-    expect(md).toContain(FIRST_RUN_MARKER); // owns the interview
+    expect(md).not.toContain(FIRST_RUN_MARKER); // interview runs on the main thread, not the keeper
     expect(md).toContain("## How To Work Here"); // loop block reused
   });
 });
