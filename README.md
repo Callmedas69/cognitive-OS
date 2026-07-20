@@ -93,10 +93,10 @@ If the hook ever misfires, nothing breaks — the agent skill still tells your a
 
 | Agent | Skill / rule it loads | Session-start hook |
 |-------|------------------------|--------------------|
-| Claude Code | `.claude/skills/cognitiveos/SKILL.md` + slash hooks `/start-session` `/end-session` `/dump` | ✅ auto-loads `STATE.md` |
-| Codex CLI | `.codex/skills/cognitiveos/SKILL.md` (+ `AGENTS.md`) | — |
-| Antigravity | `.agents/skills/cognitiveos/SKILL.md` (+ `AGENTS.md`) | ✅ auto-loads `STATE.md` |
-| Cursor / Windsurf | `.cursor/rules/cognitiveos.mdc` (+ `AGENTS.md`) | — |
+| Claude Code | `.claude/skills/cognitiveos/SKILL.md` + `cognitiveos-output/SKILL.md` + slash hooks `/start-session` `/end-session` `/dump` | ✅ auto-loads `STATE.md` |
+| Codex CLI | `.codex/skills/cognitiveos/SKILL.md` + `cognitiveos-output/SKILL.md` (+ `AGENTS.md`) | — |
+| Antigravity | `.agents/skills/cognitiveos/SKILL.md` + `cognitiveos-output/SKILL.md` (+ `AGENTS.md`) | ✅ auto-loads `STATE.md` |
+| Cursor / Windsurf | `.cursor/rules/cognitiveos.mdc` + `cognitiveos-output.mdc` (+ `AGENTS.md`) | — |
 
 > `init` never overwrites or deletes your files — existing configs and skill files are kept and merged, not clobbered.
 
@@ -132,3 +132,15 @@ MIT — [0xDas](https://x.com/Callmedas69)
 ---
 
 *"I opened my laptop and knew exactly what to do."*
+
+
+## cognitiveos-output
+
+cognitiveos-output is bundled with cognitiveOS and generated automatically during cognitiveos init. Project-local files are written to:
+
+- .claude/skills/cognitiveos-output/SKILL.md
+- .codex/skills/cognitiveos-output/SKILL.md
+- .agents/skills/cognitiveos-output/SKILL.md
+- .cursor/rules/cognitiveos-output.mdc
+
+cognitiveos install-skill --agent <claude|codex|antigravity|all> installs both managed skills offline for Claude Code, Codex CLI, and Antigravity. Cursor remains project-local. The bundled rules credit Ayoub Ghriss's MIT-licensed i-have-adhd project; it is not an installation prerequisite.

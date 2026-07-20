@@ -133,6 +133,10 @@ ${blockchainBlock}
 - Constants (never rename): \`CLAUDE.md\`, \`AGENTS.md\`, \`STATE.md\`, \`CONTEXT.md\`.
 - New project folders under projects/ follow the same slug rules as the active project.
 
+## Output style
+
+Always follow the rules in the cognitiveos-output skill: action-first, numbered steps, no preamble, no closers, state restated each turn.
+
 ## ADHD Rules (non-negotiable)
 - Max 3 action items per response
 - Max 1 question per response

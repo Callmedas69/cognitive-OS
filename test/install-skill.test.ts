@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { installSkill } from "../src/commands/install-skill.js";
 import { renderDistributableSkill } from "../src/templates/distributable-skill.md.js";
+import { renderCognitiveosOutputSkill } from "../src/templates/cognitiveos-output.md.js";
 import { LOOP_MARKER } from "../src/templates/loop-block.js";
 
 let home: string;
@@ -46,9 +47,10 @@ describe("installSkill", () => {
 
   it("all writes claude + codex + antigravity copies", () => {
     const res = installSkill("all", home);
-    expect(res.written.length).toBe(3);
+    expect(res.written.length).toBe(6);
     expect(readdirSync(join(home, ".codex", "skills", "cognitiveos"))).toContain("SKILL.md");
     expect(readdirSync(join(home, ".agents", "skills", "cognitiveos"))).toContain("SKILL.md");
+    expect(readFileSync(join(home, ".claude", "skills", "cognitiveos-output", "SKILL.md"), "utf8")).toBe(renderCognitiveosOutputSkill());
   });
 
   it("reinstall is idempotent — identical content writes nothing", () => {
